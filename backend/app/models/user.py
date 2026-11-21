@@ -1,6 +1,6 @@
-import enum
-from typing import List, TYPE_CHECKING
-from sqlalchemy import String, Boolean
+from datetime import datetime
+from typing import List, Optional, TYPE_CHECKING
+from sqlalchemy import String, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
@@ -15,6 +15,9 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_superadmin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    verification_code: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    verification_code_expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     memberships: Mapped[List["OrganizationMembership"]] = relationship(

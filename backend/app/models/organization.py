@@ -1,6 +1,7 @@
 import enum
-from typing import List, TYPE_CHECKING
-from sqlalchemy import String, Boolean, Enum
+from datetime import datetime
+from typing import List, Optional, TYPE_CHECKING
+from sqlalchemy import String, Boolean, Enum, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
@@ -35,9 +36,11 @@ class Organization(Base):
     country: Mapped[str] = mapped_column(String(64), default="US", nullable=False)
     subscription_plan: Mapped[SubscriptionPlan] = mapped_column(
         Enum(SubscriptionPlan, native_enum=False),
-        default=SubscriptionPlan.TRIAL,
+        default=SubscriptionPlan.GROWTH,
         nullable=False
     )
+    trial_ends_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    subscription_status: Mapped[str] = mapped_column(String(32), default="trialing", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # Relationships

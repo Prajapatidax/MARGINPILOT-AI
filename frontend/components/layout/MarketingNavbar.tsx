@@ -3,11 +3,13 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ArrowRight, Play } from "lucide-react";
+import { Menu, X, ArrowRight, Play, LayoutDashboard } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 export default function MarketingNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const navLinks = [
     { label: "Features", href: "/features" },
@@ -69,21 +71,34 @@ export default function MarketingNavbar() {
           })}
         </nav>
 
-        {/* Right CTA Actions */}
+        {/* Right CTA Actions - Show Dashboard when logged in */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/login"
-            className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
-          >
-            Login
-          </Link>
-          <Link
-            href="/register"
-            className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all hover:shadow flex items-center gap-2"
-          >
-            <span>Get Started</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          {user ? (
+            <Link
+              href="/dashboard"
+              className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all hover:shadow flex items-center gap-2"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              <span>Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm transition-all hover:shadow flex items-center gap-2"
+              >
+                <span>Get Started</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Hamburger Toggle */}
@@ -115,20 +130,33 @@ export default function MarketingNavbar() {
             ))}
           </nav>
           <div className="pt-4 border-t border-slate-100 flex flex-col gap-2.5">
-            <Link
-              href="/login"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 rounded-lg"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg"
-            >
-              Get Started
-            </Link>
+            {user ? (
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full text-center py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl flex items-center justify-center gap-2 shadow"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span>Go to Dashboard</span>
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 rounded-lg"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

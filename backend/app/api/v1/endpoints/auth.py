@@ -1,4 +1,6 @@
 import re
+import random
+from datetime import datetime, timedelta, timezone
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -8,11 +10,18 @@ from app.core.security import verify_password, hash_password, create_access_toke
 from app.db.session import get_db
 from app.api.deps import get_current_user
 from app.models.user import User
-from app.models.organization import Organization, BusinessType
+from app.models.organization import Organization, BusinessType, SubscriptionPlan
 from app.models.membership import OrganizationMembership, OrganizationRole
-from app.schemas.auth import LoginRequest, RegisterRequest, Token
+from app.schemas.auth import (
+    LoginRequest,
+    RegisterRequest,
+    Token,
+    VerifyEmailRequest,
+    ResendVerificationRequest
+)
 from app.schemas.user import UserResponse
 from app.schemas.organization import OrganizationResponse, OrganizationSwitchRequest
+from app.services.email_service import email_service
 
 router = APIRouter()
 
@@ -33,13 +42,20 @@ def register(
             detail="A user with this email address already exists."
         )
 
+    # Generate 6-digit Google SMTP verification code
+    verification_code = f"{random.randint(100000, 999999)}"
+    code_expires = datetime.now(timezone.utc) + timedelta(minutes=15)
+
     # Create user
     user = User(
         email=payload.email,
         hashed_password=hash_password(payload.password),
         full_name=payload.full_name,
         is_active=True,
-        is_superadmin=False
+        is_superadmin=False,
+        is_verified=False,
+        verification_code=verification_code,
+        verification_code_expires_at=code_expires
     )
     db.add(user)
     db.flush()
@@ -58,13 +74,23 @@ def register(
     except ValueError:
         biz_type = BusinessType.RETAIL
 
+    try:
+        plan_enum = SubscriptionPlan(payload.subscription_plan) if payload.subscription_plan else SubscriptionPlan.GROWTH
+    except ValueError:
+        plan_enum = SubscriptionPlan.GROWTH
+
+    trial_end = datetime.now(timezone.utc) + timedelta(days=14)
+
     org = Organization(
         name=org_name,
         slug=slug,
         business_type=biz_type,
-        currency="USD",
-        timezone="UTC",
-        country="US"
+        currency=payload.currency or "USD",
+        timezone=payload.timezone or "UTC",
+        country=payload.country or "United States",
+        subscription_plan=plan_enum,
+        trial_ends_at=trial_end,
+        subscription_status="trialing",
     )
     db.add(org)
     db.flush()
@@ -80,6 +106,9 @@ def register(
     db.commit()
     db.refresh(user)
 
+    # Send verification email via Google SMTP
+    email_service.send_verification_email(user.email, user.full_name, verification_code)
+
     token = create_access_token(
         subject=user.id,
         organization_id=org.id,
@@ -90,8 +119,66 @@ def register(
         access_token=token,
         token_type="bearer",
         active_organization_id=org.id,
-        role=OrganizationRole.OWNER.value
+        role=OrganizationRole.OWNER.value,
+        is_verified=False,
+        requires_verification=True
     )
+
+@router.post("/verify-email")
+def verify_email(
+    payload: VerifyEmailRequest,
+    db: Session = Depends(get_db)
+) -> Any:
+    """Verifies user email with the 6-digit Google SMTP OTP code."""
+    user = db.execute(select(User).where(User.email == payload.email)).scalar_one_or_none()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account with this email does not exist."
+        )
+    if user.is_verified:
+        return {"status": "already_verified", "message": "Email is already verified."}
+
+    if not user.verification_code or user.verification_code.strip() != payload.code.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid 6-digit verification code. Please check your inbox or request a new code."
+        )
+
+    if user.verification_code_expires_at and user.verification_code_expires_at < datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Verification code has expired. Please request a new code."
+        )
+
+    user.is_verified = True
+    user.verification_code = None
+    user.verification_code_expires_at = None
+    db.commit()
+    return {"status": "verified", "message": "Email address verified successfully!"}
+
+@router.post("/resend-verification")
+def resend_verification(
+    payload: ResendVerificationRequest,
+    db: Session = Depends(get_db)
+) -> Any:
+    """Resends a fresh 6-digit verification code to the user's email."""
+    user = db.execute(select(User).where(User.email == payload.email)).scalar_one_or_none()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account not found."
+        )
+    if user.is_verified:
+        return {"status": "already_verified", "message": "Email is already verified."}
+
+    new_code = f"{random.randint(100000, 999999)}"
+    user.verification_code = new_code
+    user.verification_code_expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+    db.commit()
+
+    email_service.send_verification_email(user.email, user.full_name, new_code)
+    return {"status": "sent", "message": "A new verification code has been dispatched to your email."}
 
 @router.post("/login", response_model=Token)
 def login(

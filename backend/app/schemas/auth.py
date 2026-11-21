@@ -6,6 +6,8 @@ class Token(BaseModel):
     token_type: str = "bearer"
     active_organization_id: Optional[str] = None
     role: Optional[str] = None
+    is_verified: bool = False
+    requires_verification: bool = False
 
 class TokenPayload(BaseModel):
     sub: Optional[str] = None
@@ -22,5 +24,16 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
     full_name: str
-    organization_name: Optional[str] = None  # Optional initial organization creation
+    organization_name: Optional[str] = None  # Initial organization creation
     business_type: Optional[str] = "RETAIL"
+    country: Optional[str] = "United States"
+    currency: Optional[str] = "USD"
+    timezone: Optional[str] = "UTC"
+    subscription_plan: Optional[str] = "GROWTH"
+
+class VerifyEmailRequest(BaseModel):
+    email: EmailStr
+    code: str
+
+class ResendVerificationRequest(BaseModel):
+    email: EmailStr

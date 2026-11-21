@@ -15,11 +15,14 @@ import {
   Play,
   ShieldCheck,
   CheckCircle2,
+  LayoutDashboard,
 } from "lucide-react";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
 import MarketingFooter from "@/components/layout/MarketingFooter";
+import { useAuth } from "@/lib/auth-context";
 
 export default function LandingPage() {
+  const { user, activeOrg } = useAuth();
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-600 selection:text-white flex flex-col">
       {/* Navigation */}
@@ -43,20 +46,38 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              <Link
-                href="/register"
-                className="px-7 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all hover:shadow-lg flex items-center gap-2"
-              >
-                <span>Start Free Trial</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                href="/demo"
-                className="px-6 py-3.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-colors flex items-center gap-2"
-              >
-                <Play className="w-4 h-4 text-slate-400 fill-slate-400" />
-                <span>Watch Demo</span>
-              </Link>
+              {user ? (
+                <div className="flex flex-wrap items-center gap-4">
+                  <Link
+                    href="/dashboard"
+                    className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl shadow-md transition-all hover:shadow-lg flex items-center gap-2.5"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Enter Workspace</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <span className="text-xs text-slate-500 font-medium">
+                    Signed in as <strong className="text-slate-800">{user.full_name}</strong> {activeOrg ? `(${activeOrg.name})` : ""}
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <Link
+                    href="/register"
+                    className="px-7 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all hover:shadow-lg flex items-center gap-2"
+                  >
+                    <span>Start Free Trial</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    href="/demo"
+                    className="px-6 py-3.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-colors flex items-center gap-2"
+                  >
+                    <Play className="w-4 h-4 text-slate-400 fill-slate-400" />
+                    <span>Watch Demo</span>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Feature Pills */}
@@ -241,10 +262,10 @@ export default function LandingPage() {
             </p>
           </div>
           <Link
-            href="/register"
+            href={user ? "/dashboard" : "/register"}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow transition-colors flex items-center gap-2 shrink-0"
           >
-            <span>Get Started</span>
+            <span>{user ? "Return to Workspace" : "Get Started"}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

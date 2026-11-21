@@ -189,14 +189,45 @@ export default function ContactPage() {
             </div>
 
             <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 space-y-3 text-xs text-slate-600">
-              <h4 className="font-bold text-slate-900 text-sm">Global Operations</h4>
+              <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-blue-600" />
+                <span>Global Office Locations</span>
+              </h4>
               <p>
                 MarginPilot AI operates out of North America, Europe, and Asia-Pacific with high-availability Neon database replicas and low-latency Upstash edge clusters.
               </p>
-              <div className="pt-2 text-[11px] text-slate-500 font-mono space-y-1">
-                <p>• San Francisco: 100 Montgomery St, Suite 1400</p>
-                <p>• London: 25 Bank St, Canary Wharf</p>
-                <p>• Singapore: 1 Marina Boulevard</p>
+              <div className="pt-2 text-xs text-slate-700 space-y-2.5">
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 flex items-start gap-2">
+                  <span className="text-base shrink-0">🇮🇳</span>
+                  <div>
+                    <span className="font-bold text-slate-900 block">Gandhinagar, Gujarat</span>
+                    <span className="text-[11px] text-slate-500">GIFT City, Brigade International Financial Centre, Tower 1, Level 14, Gandhinagar, Gujarat 382355, India</span>
+                  </div>
+                </div>
+
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 flex items-start gap-2">
+                  <span className="text-base shrink-0">🇺🇸</span>
+                  <div>
+                    <span className="font-bold text-slate-900 block">San Francisco, United States</span>
+                    <span className="text-[11px] text-slate-500">100 Montgomery St, Suite 1400, San Francisco, CA 94104</span>
+                  </div>
+                </div>
+
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 flex items-start gap-2">
+                  <span className="text-base shrink-0">🇬🇧</span>
+                  <div>
+                    <span className="font-bold text-slate-900 block">London, United Kingdom</span>
+                    <span className="text-[11px] text-slate-500">25 Bank St, Canary Wharf, London E14 5JP</span>
+                  </div>
+                </div>
+
+                <div className="p-2.5 bg-white rounded-xl border border-slate-200 flex items-start gap-2">
+                  <span className="text-base shrink-0">🇸🇬</span>
+                  <div>
+                    <span className="font-bold text-slate-900 block">Singapore</span>
+                    <span className="text-[11px] text-slate-500">1 Marina Boulevard, #28-00, Singapore 018989</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
