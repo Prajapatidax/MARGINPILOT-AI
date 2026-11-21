@@ -146,7 +146,7 @@ export default function SimulatorPage() {
                   Projected Stockout Risk
                 </div>
                 <div className="text-base font-bold text-amber-900">
-                  {simulation?.projected_stockout_risk_pct || 92.0}%
+                  {simulation?.projected_stockout_risk_pct !== undefined ? `${simulation.projected_stockout_risk_pct}%` : "0.0%"}
                 </div>
               </div>
             </div>
@@ -163,30 +163,36 @@ export default function SimulatorPage() {
             <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/60">
               <div className="text-xs font-medium text-slate-500">Revenue Impact</div>
               <div className="text-2xl font-bold text-emerald-600 mt-1">
-                +{simulation?.expected_revenue_change_pct || 8.5}%
+                {simulation?.expected_revenue_change_pct !== undefined && simulation.expected_revenue_change_pct !== 0
+                  ? `${simulation.expected_revenue_change_pct > 0 ? "+" : ""}${simulation.expected_revenue_change_pct}%`
+                  : "0.0%"}
               </div>
               <div className="text-xs text-slate-400 mt-1">
-                ${simulation?.simulated_revenue.toLocaleString()} projected
+                ${(simulation?.simulated_revenue || 0).toLocaleString()} projected
               </div>
             </div>
 
             <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/60">
               <div className="text-xs font-medium text-slate-500">Profit Impact</div>
               <div className="text-2xl font-bold text-emerald-600 mt-1">
-                +{simulation?.expected_profit_change_pct || 6.2}%
+                {simulation?.expected_profit_change_pct !== undefined && simulation.expected_profit_change_pct !== 0
+                  ? `${simulation.expected_profit_change_pct > 0 ? "+" : ""}${simulation.expected_profit_change_pct}%`
+                  : "0.0%"}
               </div>
               <div className="text-xs text-slate-400 mt-1">
-                ${simulation?.simulated_profit.toLocaleString()} projected
+                ${(simulation?.simulated_profit || 0).toLocaleString()} projected
               </div>
             </div>
 
             <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/60">
               <div className="text-xs font-medium text-slate-500">Gross Margin</div>
               <div className="text-2xl font-bold text-slate-900 mt-1">
-                {simulation?.expected_gross_margin_pct || 38.1}%
+                {simulation?.expected_gross_margin_pct !== undefined
+                  ? `${simulation.expected_gross_margin_pct}%`
+                  : "0.0%"}
               </div>
               <div className="text-xs text-slate-400 mt-1">
-                Wholesale volume efficiency unlocked
+                {simulation?.current_revenue ? "Wholesale volume efficiency unlocked" : "Awaiting baseline data"}
               </div>
             </div>
           </div>

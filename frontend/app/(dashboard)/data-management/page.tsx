@@ -97,7 +97,8 @@ export default function DataManagementPage() {
       const token = localStorage.getItem("marginpilot_token");
       const activeOrgId = localStorage.getItem("marginpilot_active_org_id");
 
-      const response = await fetch("http://localhost:8000/api/v1/data-imports/upload", {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+      const response = await fetch(`${baseUrl}/data-imports/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

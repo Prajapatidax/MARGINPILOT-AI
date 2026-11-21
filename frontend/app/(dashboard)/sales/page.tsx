@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   TrendingUp,
   DollarSign,
@@ -12,6 +13,8 @@ import {
   ArrowDownRight,
   Download,
   Filter,
+  Inbox,
+  PieChart as PieChartIcon,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -52,31 +55,17 @@ export default function SalesIntelligencePage() {
     fetchSales();
   }, [dateRange, activeOrg]);
 
-  // Fallback visual trends if zero orders yet
-  const displayTrends = data?.sales_trend?.length > 0 ? data.sales_trend : [
-    { date: "May 01", sales: 12000 },
-    { date: "May 05", sales: 18500 },
-    { date: "May 10", sales: 24000 },
-    { date: "May 15", sales: 31000 },
-    { date: "May 20", sales: 42000 },
-    { date: "May 25", sales: 48000 },
-    { date: "May 30", sales: 56000 },
-  ];
+  const totalSales = Number(data?.total_sales || 0);
+  const salesGrowth = Number(data?.sales_growth_rate || 0);
+  const profitGrowth = Number(data?.profit_growth_rate || 0);
+  const aov = Number(data?.average_order_value || 0);
+  const totalOrders = Number(data?.total_orders || 0);
+  const grossMargin = Number(data?.gross_margin_percentage || 0);
+  const grossProfit = Number(data?.gross_profit || 0);
 
-  const displayCategories = data?.sales_by_category?.length > 0 ? data.sales_by_category : [
-    { name: "Electronics", percentage: 40, sales: 98000, color: "#2563eb" },
-    { name: "Fashion", percentage: 35, sales: 86000, color: "#8b5cf6" },
-    { name: "Home & Living", percentage: 25, sales: 64750, color: "#06b6d4" },
-  ];
-
-  const displayProfitability = data?.profitability_trend?.length > 0 ? data.profitability_trend : [
-    { period: "Jan", revenue: 45000, cogs: 28000, gross_profit: 17000 },
-    { period: "Feb", revenue: 82000, cogs: 51000, gross_profit: 31000 },
-    { period: "Mar", revenue: 125000, cogs: 78000, gross_profit: 47000 },
-    { period: "Apr", revenue: 154000, cogs: 95000, gross_profit: 59000 },
-    { period: "May", revenue: 198000, cogs: 122000, gross_profit: 76000 },
-    { period: "Jun", revenue: 248750, cogs: 156320, gross_profit: 92430 },
-  ];
+  const displayTrends = data?.sales_trend || [];
+  const displayCategories = data?.sales_by_category || [];
+  const displayProfitability = data?.profitability_trend || [];
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -107,23 +96,31 @@ export default function SalesIntelligencePage() {
         </div>
       </div>
 
-      {/* Top 2 Metric Cards */}
+      {/* Top 4 Metric Cards (Real Values Only) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Sales</span>
           <div className="text-2xl font-bold text-slate-900 mt-2">
-            ${(data?.total_sales || 248750).toLocaleString()}
+            ${totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="flex items-center gap-1 mt-1 text-xs font-semibold text-emerald-600">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            <span>{data?.sales_growth_rate || 12.5}% vs previous period</span>
+            {salesGrowth !== 0 ? (
+              <>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+                <span>{salesGrowth}% vs previous period</span>
+              </>
+            ) : (
+              <span className="text-slate-400 font-normal">
+                {totalSales > 0 ? "Initial baseline" : "Awaiting sales import"}
+              </span>
+            )}
           </div>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Growth Rate</span>
           <div className="text-2xl font-bold text-slate-900 mt-2">
-            {data?.profit_growth_rate || 14.2}%
+            {profitGrowth !== 0 ? `${profitGrowth}%` : "0.0%"}
           </div>
           <div className="flex items-center gap-1 mt-1 text-xs font-semibold text-blue-600">
             <TrendingUp className="w-3.5 h-3.5" />
@@ -134,18 +131,18 @@ export default function SalesIntelligencePage() {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Average Order Value (AOV)</span>
           <div className="text-2xl font-bold text-slate-900 mt-2">
-            ${(data?.average_order_value || 185.5).toLocaleString()}
+            ${aov.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
-          <div className="text-xs text-slate-400 mt-1">Across {data?.total_orders || 1340} total orders</div>
+          <div className="text-xs text-slate-400 mt-1">Across {totalOrders} total orders</div>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Gross Margin</span>
           <div className="text-2xl font-bold text-slate-900 mt-2">
-            {data?.gross_margin_percentage || 37.2}%
+            {grossMargin.toFixed(1)}%
           </div>
           <div className="text-xs text-emerald-600 font-semibold mt-1">
-            Gross Profit: ${(data?.gross_profit || 92430).toLocaleString()}
+            Gross Profit: ${grossProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
       </div>
@@ -157,107 +154,159 @@ export default function SalesIntelligencePage() {
             <h2 className="text-base font-bold text-slate-900">Sales Trend Progression</h2>
             <p className="text-xs text-slate-400">Continuous revenue velocity over the selected timeline</p>
           </div>
-          <span className="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg">
-            Aggregated Live Query
-          </span>
+          {displayTrends.length > 0 && (
+            <span className="text-xs font-semibold px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg">
+              Live SQL Analytics
+            </span>
+          )}
         </div>
 
         <div className="h-72 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={displayTrends} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis
-                stroke="#94a3b8"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(val) => `$${val / 1000}k`}
-              />
-              <Tooltip
-                formatter={(val: number) => [`$${val.toLocaleString()}`, "Sales"]}
-                contentStyle={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0", borderRadius: 8, fontSize: 12 }}
-              />
-              <Area type="monotone" dataKey="sales" stroke="#2563eb" strokeWidth={2.5} fillOpacity={1} fill="url(#salesGrad)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Bottom Grid: Sales by Category & Profitability Trend */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sales by Category Donut */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <h2 className="text-base font-bold text-slate-900">Sales by Category</h2>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="w-48 h-48 relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={displayCategories}
-                    innerRadius={50}
-                    outerRadius={75}
-                    paddingAngle={3}
-                    dataKey="percentage"
-                  >
-                    {displayCategories.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="space-y-3 flex-1">
-              {displayCategories.map((cat: any) => (
-                <div key={cat.name} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }}></span>
-                    <span className="font-medium text-slate-700">{cat.name}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-bold text-slate-900">{cat.percentage}%</span>
-                    <span className="text-[11px] text-slate-400 block">${cat.sales.toLocaleString()}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Profitability Trend Bar Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-900">Profitability Trend</h2>
-            <span className="text-xs text-slate-400">Revenue vs Gross Profit</span>
-          </div>
-
-          <div className="h-56 w-full">
+          {displayTrends.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={displayProfitability} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <AreaChart data={displayTrends} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="period" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                <XAxis dataKey="date" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis
                   stroke="#94a3b8"
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(val) => `$${val / 1000}k`}
+                  tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(0) + "k" : val}`}
                 />
                 <Tooltip
-                  formatter={(val: number) => [`$${val.toLocaleString()}`, ""]}
+                  formatter={(val: number) => [`$${val.toLocaleString()}`, "Sales"]}
                   contentStyle={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0", borderRadius: 8, fontSize: 12 }}
                 />
-                <Bar dataKey="revenue" name="Revenue" fill="#93c5fd" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="gross_profit" name="Gross Profit" fill="#2563eb" radius={[4, 4, 0, 0]} />
-              </BarChart>
+                <Area
+                  type="monotone"
+                  dataKey="sales"
+                  stroke="#2563eb"
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#salesGrad)"
+                />
+              </AreaChart>
             </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+              <Inbox className="w-8 h-8 text-slate-300 mb-2" />
+              <p className="text-xs font-semibold text-slate-700">No sales transactions found</p>
+              <p className="text-[11px] text-slate-400 max-w-xs mt-0.5">
+                Upload your sales orders in Data Management to view real-time sales trend curves.
+              </p>
+              <Link
+                href="/data-management"
+                className="mt-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors"
+              >
+                Import Data
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Grid: Sales by Category & Profitability Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Sales by Category */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-slate-900">Sales by Category</h2>
+            <span className="text-xs text-slate-400">Share of revenue</span>
+          </div>
+
+          {displayCategories.length > 0 ? (
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="w-48 h-48 relative shrink-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={displayCategories}
+                      innerRadius={50}
+                      outerRadius={75}
+                      paddingAngle={4}
+                      dataKey="percentage"
+                    >
+                      {displayCategories.map((entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={entry.color || "#2563eb"} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="flex-1 w-full space-y-3">
+                {displayCategories.map((cat: any) => (
+                  <div key={cat.name} className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color || "#2563eb" }}></span>
+                        <span className="font-semibold text-slate-700">{cat.name}</span>
+                      </div>
+                      <span className="font-bold text-slate-900">{cat.percentage}%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${cat.percentage}%`, backgroundColor: cat.color || "#2563eb" }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="py-12 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200 p-4">
+              <PieChartIcon className="w-6 h-6 text-slate-300 mx-auto mb-1.5" />
+              <p className="text-xs font-semibold text-slate-700">No category breakdown available</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Assign categories to products to view share of revenue.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Profitability Trend (Bar Chart: Revenue vs COGS vs Profit) */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-slate-900">Profitability Trend</h2>
+            <span className="text-xs text-slate-400">Revenue vs COGS vs Profit</span>
+          </div>
+
+          <div className="h-60 w-full">
+            {displayProfitability.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={displayProfitability} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="period" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis
+                    stroke="#94a3b8"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(0) + "k" : val}`}
+                  />
+                  <Tooltip
+                    formatter={(val: number) => [`$${val.toLocaleString()}`, ""]}
+                    contentStyle={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0", borderRadius: 8, fontSize: 12 }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                  <Bar dataKey="revenue" name="Revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="cogs" name="COGS" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="gross_profit" name="Profit" fill="#10b981" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                <TrendingUp className="w-8 h-8 text-slate-300 mb-2" />
+                <p className="text-xs font-semibold text-slate-700">No profitability data</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">COGS and gross margin history will appear when orders are logged.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

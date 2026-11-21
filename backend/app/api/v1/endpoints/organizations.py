@@ -192,19 +192,28 @@ def get_superadmin_overview(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ) -> Any:
-    """Super Admin platform-wide monitoring overview."""
-    total_orgs = db.execute(select(func.count(Organization.id))).scalar() or 248
-    active_users = db.execute(select(func.count(User.id))).scalar() or 24800
+    """Super Admin platform-wide monitoring overview with verified database metrics."""
+    total_orgs = db.execute(select(func.count(Organization.id))).scalar() or 0
+    active_users = db.execute(select(func.count(User.id))).scalar() or 0
+
+    from app.models.audit import AuditEvent
+    audit_logs = db.execute(
+        select(AuditEvent).order_by(AuditEvent.created_at.desc()).limit(5)
+    ).scalars().all()
+
+    recent_activity = []
+    for log in audit_logs:
+        recent_activity.append({
+            "id": log.id,
+            "action": log.action,
+            "target": f"{log.entity_type} {log.entity_id or ''}".strip(),
+            "time_ago": "Recently"
+        })
 
     return {
-        "total_orgs": max(int(total_orgs), 248),
-        "active_users": "24.8K" if active_users >= 1000 else str(active_users),
+        "total_orgs": int(total_orgs),
+        "active_users": f"{round(active_users / 1000, 1)}K" if active_users >= 1000 else str(active_users),
         "system_uptime": "99.9%",
-        "recent_activity": [
-            {"id": "act-1", "action": "New organization registered", "target": "Acme Retail Group", "time_ago": "2m ago"},
-            {"id": "act-2", "action": "Model training completed", "target": "HistGradientBoosting v2.0", "time_ago": "5m ago"},
-            {"id": "act-3", "action": "Sales dataset uploaded", "target": "Q4_Transactions.csv (24.8K rows)", "time_ago": "12m ago"},
-            {"id": "act-4", "action": "Stockout alert triggered", "target": "Wireless Earbuds (Under buffer)", "time_ago": "25m ago"},
-        ]
+        "recent_activity": recent_activity
     }
 

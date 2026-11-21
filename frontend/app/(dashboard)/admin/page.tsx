@@ -38,17 +38,11 @@ export default function AdminPage() {
       setData(res.data);
     } catch (err) {
       console.error("Failed to load admin stats:", err);
-      // Fallback matching mockup
       setData({
-        total_orgs: 248,
-        active_users: "24.8K",
+        total_orgs: 1,
+        active_users: "1",
         system_uptime: "99.9%",
-        recent_activity: [
-          { id: "1", action: "New organization registered", target: "Acme Retail Group", time_ago: "2m ago" },
-          { id: "2", action: "Model training completed", target: "HistGradientBoosting v2.0", time_ago: "5m ago" },
-          { id: "3", action: "Sales dataset uploaded", target: "Q4_Transactions.csv", time_ago: "12m ago" },
-          { id: "4", action: "Stockout alert triggered", target: "Wireless Earbuds", time_ago: "25m ago" },
-        ],
+        recent_activity: [],
       });
     } finally {
       setIsLoading(false);
@@ -151,27 +145,33 @@ export default function AdminPage() {
         </div>
 
         <div className="divide-y divide-slate-100">
-          {(data?.recent_activity || []).map((act) => (
-            <div key={act.id} className="py-3 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                  <Activity className="w-3.5 h-3.5" />
+          {(data?.recent_activity || []).length > 0 ? (
+            (data?.recent_activity || []).map((act) => (
+              <div key={act.id} className="py-3 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <Activity className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <span className="font-semibold text-slate-900">
+                      {act.action}
+                    </span>
+                    <span className="text-slate-400 ml-2">
+                      ({act.target})
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-semibold text-slate-900">
-                    {act.action}
-                  </span>
-                  <span className="text-slate-400 ml-2">
-                    ({act.target})
-                  </span>
-                </div>
-              </div>
 
-              <span className="text-slate-400 font-mono text-[11px]">
-                {act.time_ago}
-              </span>
+                <span className="text-slate-400 font-mono text-[11px]">
+                  {act.time_ago}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className="py-8 text-center text-xs text-slate-400">
+              No administrative audit events recorded yet.
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

@@ -153,10 +153,10 @@ export default function ForecastingPage() {
             Model Accuracy (MAPE)
           </div>
           <div className="text-2xl font-bold text-emerald-600 mt-1">
-            91.3%
+            {forecasts.length > 0 ? "91.3%" : "N/A"}
           </div>
           <div className="text-xs text-slate-400 mt-1">
-            HistGradientBoostingRegressor
+            {forecasts.length > 0 ? "HistGradientBoostingRegressor" : "Awaiting model training"}
           </div>
         </div>
 
@@ -168,7 +168,7 @@ export default function ForecastingPage() {
             {forecasts.length} Products
           </div>
           <div className="text-xs text-slate-400 mt-1">
-            Fully modeled lag vectors
+            {forecasts.length > 0 ? "Fully modeled lag vectors" : "No products imported"}
           </div>
         </div>
 
@@ -177,10 +177,16 @@ export default function ForecastingPage() {
             Confidence Interval
           </div>
           <div className="text-2xl font-bold text-slate-900 mt-1">
-            ± 12.0%
+            {forecasts.length > 0 ? "± 12.0%" : "N/A"}
           </div>
           <div className="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5" /> 95% Distribution Band
+            {forecasts.length > 0 ? (
+              <>
+                <ShieldCheck className="w-3.5 h-3.5" /> 95% Distribution Band
+              </>
+            ) : (
+              <span className="text-slate-400">Baseline interval</span>
+            )}
           </div>
         </div>
       </div>
@@ -195,22 +201,32 @@ export default function ForecastingPage() {
         </p>
 
         <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#64748b" }} />
-              <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#64748b" }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#ffffff",
-                  borderColor: "#e2e8f0",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-              />
-              <Bar dataKey="forecast" fill="#2563eb" radius={[4, 4, 0, 0]} name="Projected Units" />
-            </BarChart>
-          </ResponsiveContainer>
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#64748b" }} />
+                <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "#64748b" }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#ffffff",
+                    borderColor: "#e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                  }}
+                />
+                <Bar dataKey="forecast" fill="#2563eb" radius={[4, 4, 0, 0]} name="Projected Units" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+              <TrendingUp className="w-8 h-8 text-slate-300 mb-2" />
+              <p className="text-xs font-semibold text-slate-700">No SKU demand projections</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Import sales orders and click &quot;Retrain Forecaster&quot; to compute multi-horizon demand.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

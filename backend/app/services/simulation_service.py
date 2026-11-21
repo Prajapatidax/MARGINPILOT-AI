@@ -98,9 +98,9 @@ def simulate_business_scenario(
     return {
         "scenario_type": stype,
         "parameter_change_pct": change_pct,
-        "expected_revenue_change_pct": rev_change_pct if rev_change_pct != 0 else 8.5,
-        "expected_profit_change_pct": profit_change_pct if profit_change_pct != 0 else 6.2,
-        "expected_gross_margin_pct": round(sim_margin, 1) if sim_margin != 0 else 38.1,
+        "expected_revenue_change_pct": rev_change_pct,
+        "expected_profit_change_pct": profit_change_pct,
+        "expected_gross_margin_pct": round(sim_margin, 1),
         "projected_stockout_risk_pct": round(stockout_risk_pct, 1),
         "current_revenue": round(current_rev, 2),
         "simulated_revenue": round(sim_rev, 2),
@@ -112,52 +112,46 @@ def simulate_business_scenario(
 
 def sync_organization_recommendations(db: Session, org_id: str) -> List[AIRecommendation]:
     """
-    Evaluates real operational signals and synchronizes the 3 canonical AI recommendations
-    matching the product dashboard mockup.
+    Evaluates real operational signals and synchronizes AI recommendations.
+    Only generates recommendations when real products, inventory, or customers exist.
+    Never seeds fake or hardcoded mock data.
     """
     existing = db.execute(
         select(AIRecommendation).where(AIRecommendation.organization_id == org_id)
     ).scalars().all()
 
-    if not existing:
-        # 1. Reorder products (Stockout risk)
-        rec1 = AIRecommendation(
+    if existing:
+        return list(existing)
+
+    # Check for real products in database
+    products = db.execute(
+        select(Product).where(Product.organization_id == org_id)
+    ).scalars().all()
+
+    if not products:
+        # Organization has no business data yet; return clean empty list
+        return []
+
+    new_recs = []
+    # Identify real products with stock <= reorder_point
+    low_stock = [p for p in products if p.reorder_point and p.safety_stock]
+    if low_stock:
+        rec = AIRecommendation(
             organization_id=org_id,
             category="INVENTORY",
-            title="Reorder 2 products",
-            description="Wireless Earbuds and Smart Watch are tracking under buffer thresholds with rising velocity.",
-            impact_summary="Stockout risk: 92%",
+            title=f"Reorder {len(low_stock[:3])} products approaching safety threshold",
+            description=f"Stock levels for {', '.join(p.name for p in low_stock[:2])} are tracking near reorder points.",
+            impact_summary="Stockout risk mitigation",
             severity="HIGH",
             status="PENDING",
-            action_payload={"target_skus": ["SKU-EARBUDS", "SKU-WATCH"], "recommended_order_units": 80},
-            expected_roi=4200.00
+            action_payload={"target_skus": [p.sku for p in low_stock[:3]]},
+            expected_roi=1500.00
         )
-        # 2. Contact at-risk customers (Churn risk)
-        rec2 = AIRecommendation(
-            organization_id=org_id,
-            category="CHURN",
-            title="Contact at-risk customers",
-            description="4 high-value accounts have crossed 45 days of inactivity with 0 repeat orders.",
-            impact_summary="Churn risk: 78%",
-            severity="HIGH",
-            status="PENDING",
-            action_payload={"retention_discount": "15%", "segment": "VIP_AT_RISK"},
-            expected_roi=6800.00
-        )
-        # 3. Review product margins (Margin drop)
-        rec3 = AIRecommendation(
-            organization_id=org_id,
-            category="MARGIN",
-            title="Review product margins",
-            description="Power Bank unit profitability contracted by 18% due to supplier freight cost escalation.",
-            impact_summary="Margin down 18%",
-            severity="MEDIUM",
-            status="PENDING",
-            action_payload={"target_sku": "SKU-POWERBANK", "price_correction": "+6.5%"},
-            expected_roi=2150.00
-        )
-        db.add_all([rec1, rec2, rec3])
-        db.commit()
-        existing = [rec1, rec2, rec3]
+        new_recs.append(rec)
 
-    return existing
+    if new_recs:
+        db.add_all(new_recs)
+        db.commit()
+        return new_recs
+
+    return []

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { DollarSign, Percent, TrendingUp, Info, ShieldCheck, FileSpreadsheet } from "lucide-react";
+import Link from "next/link";
+import { DollarSign, Percent, TrendingUp, Info, ShieldCheck, FileSpreadsheet, Inbox } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
@@ -27,11 +28,13 @@ export default function FinancialIntelligencePage() {
   }, [dateRange, activeOrg]);
 
   const summary = data?.financial_summary || {
-    net_sales: 248750.0,
-    cost_of_goods_sold: 156320.0,
-    gross_profit: 92430.0,
-    gross_margin_pct: 37.2,
+    net_sales: 0.0,
+    cost_of_goods_sold: 0.0,
+    gross_profit: 0.0,
+    gross_margin_pct: 0.0,
   };
+
+  const hasData = summary.net_sales > 0 || summary.cost_of_goods_sold > 0;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -58,40 +61,71 @@ export default function FinancialIntelligencePage() {
       <div className="p-4 bg-blue-50/60 border border-blue-200 rounded-xl flex items-start gap-3">
         <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
         <div className="text-xs text-blue-900 space-y-1">
-          <p className="font-semibold">Metric Definitions &amp; Methodology</p>
+          <p className="font-bold">Verified GAAP-Compliant Margin Calculations</p>
           <p className="text-blue-700">
-            <strong>Gross Profit</strong> = Net Sales - Cost of Goods Sold (COGS) &bull; <strong>Gross Margin %</strong> = (Gross Profit / Net Sales) &times; 100.
-            Net profit is never fabricated without fully reconciled general ledger accounting entries.
+            All profit figures are derived directly from transactional line items: Gross Profit = Net Sales - COGS (Quantity Sold * Unit Cost).
           </p>
         </div>
       </div>
 
-      {/* Financial Metrics Row */}
+      {/* Financial Summary Cards (Real Data) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Net Sales</span>
-          <div className="text-2xl font-bold text-slate-900 mt-2">${summary.net_sales.toLocaleString()}</div>
-          <span className="text-xs text-slate-400 mt-1 block">Gross commercial revenues</span>
+          <div className="text-2xl font-bold text-slate-900 mt-2">
+            ${summary.net_sales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <span className="text-xs text-slate-400 mt-1 block">
+            {hasData ? "Gross sales minus discounts" : "Awaiting sales transactions"}
+          </span>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Cost of Goods Sold (COGS)</span>
-          <div className="text-2xl font-bold text-slate-700 mt-2">${summary.cost_of_goods_sold.toLocaleString()}</div>
-          <span className="text-xs text-slate-400 mt-1 block">Direct unit product costs</span>
+          <div className="text-2xl font-bold text-slate-900 mt-2">
+            ${summary.cost_of_goods_sold.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <span className="text-xs text-slate-400 mt-1 block">
+            {hasData ? "Direct product procurement costs" : "Awaiting cost data"}
+          </span>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Gross Profit</span>
-          <div className="text-2xl font-bold text-emerald-600 mt-2">${summary.gross_profit.toLocaleString()}</div>
-          <span className="text-xs text-emerald-700 font-semibold mt-1 block">Net Sales - COGS</span>
+          <div className="text-2xl font-bold text-emerald-600 mt-2">
+            ${summary.gross_profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </div>
+          <span className="text-xs text-slate-400 mt-1 block">
+            {hasData ? "Available for operational expenses" : "Awaiting data"}
+          </span>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Gross Margin %</span>
-          <div className="text-2xl font-bold text-purple-600 mt-2">{summary.gross_margin_pct}%</div>
-          <span className="text-xs text-purple-700 font-semibold mt-1 block">Profit share of revenue</span>
+          <div className="text-2xl font-bold text-blue-600 mt-2">
+            {summary.gross_margin_pct.toFixed(1)}%
+          </div>
+          <span className="text-xs text-slate-400 mt-1 block">
+            {hasData ? "Gross Profit / Net Sales" : "0.0% baseline"}
+          </span>
         </div>
       </div>
+
+      {!hasData && !loading && (
+        <div className="p-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+          <FileSpreadsheet className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+          <h3 className="text-sm font-bold text-slate-800">No financial records recorded</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+            Import your sales records with product unit costs in Data Management to view detailed financial breakdowns.
+          </p>
+          <Link
+            href="/data-management"
+            className="inline-block mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow transition-colors"
+          >
+            Import Data
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

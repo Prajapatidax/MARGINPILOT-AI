@@ -28,19 +28,34 @@ def get_analytics_summary(
 
     has_data = sales_data["total_sales"] > 0 or prod_data["total_catalog_products"] > 0
 
+    # Fetch real AI recommendations if any exist
+    from app.services.simulation_service import sync_organization_recommendations
+    recs = sync_organization_recommendations(db, tenant.organization_id)
+    rec_summaries = [
+        {
+            "id": r.id,
+            "title": r.title,
+            "description": r.description,
+            "impact_summary": r.impact_summary,
+            "severity": r.severity,
+            "category": r.category
+        }
+        for r in recs[:3]
+    ]
+
     return {
         "organization_id": tenant.organization_id,
         "date_range": date_range,
         "has_data": has_data,
         "metrics": {
             "total_revenue": sales_data["total_sales"],
-            "revenue_change_pct": sales_data["sales_growth_rate"],
+            "revenue_change_pct": sales_data["sales_growth_rate"] if has_data else 0.0,
             "gross_profit": sales_data["gross_profit"],
-            "gross_profit_change_pct": sales_data["profit_growth_rate"],
+            "gross_profit_change_pct": sales_data["profit_growth_rate"] if has_data else 0.0,
             "gross_margin_pct": sales_data["gross_margin_percentage"],
-            "gross_margin_change_pct": 1.8,
+            "gross_margin_change_pct": 0.0 if not has_data else sales_data["profit_growth_rate"],
             "active_customers": cust_data["total_customers"],
-            "active_customers_change_pct": 8.1,
+            "active_customers_change_pct": 0.0,
             "total_orders": sales_data["total_orders"],
             "average_order_value": sales_data["average_order_value"]
         },
@@ -48,7 +63,7 @@ def get_analytics_summary(
         "top_products": prod_data["top_performing_products"][:5],
         "customer_segments": cust_data["segment_distribution"],
         "inventory_alerts": inv_data["stockout_alerts"][:5],
-        "ai_recommendations": []
+        "ai_recommendations": rec_summaries
     }
 
 @router.get("/sales")

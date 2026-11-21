@@ -108,53 +108,50 @@ export default function ModelCenterPage() {
   };
 
 
-  // Pre-configured baseline cards matching mockup
-  const modelCards = [
-    {
-      id: "customer_churn",
-      name: "Customer Churn",
-      version: "v1.2.0",
-      type: "Customer",
-      icon: Users,
-      iconBg: "bg-amber-50 text-amber-600 border-amber-200",
-      status: "Active",
-      metricLabel: "Accuracy",
-      metricValue: "91.4%",
-      drift: "Stable",
-      algorithm: "Random Forest Classifier",
-    },
-    {
-      id: "demand_forecast",
-      name: "Demand Forecasting",
-      version: "v2.0.0",
-      type: "Forecasting",
-      icon: TrendingUp,
-      iconBg: "bg-blue-50 text-blue-600 border-blue-200",
-      status: "Active",
-      metricLabel: "MAPE",
-      metricValue: "8.7%",
-      drift: "Stable",
-      algorithm: "HistGradientBoostingRegressor",
-    },
-    {
-      id: "anomaly_detection",
-      name: "Anomaly Detection",
-      version: "v1.1.0",
-      type: "Anomaly",
-      icon: AlertTriangle,
-      iconBg: "bg-indigo-50 text-indigo-600 border-indigo-200",
-      status: "Active",
-      metricLabel: "F1-Score",
-      metricValue: "94.1%",
-      drift: "Stable",
-      algorithm: "Isolation Forest (Contamination 8%)",
-    },
-  ];
+  // Dynamic cards computed from real trained database models
+  const modelCards = models.map((m) => {
+    let icon = Cpu;
+    let iconBg = "bg-blue-50 text-blue-600 border-blue-200";
+    let metricLabel = "Quality";
+    let metricVal = "Trained";
+
+    const mType = (m.model_type || "").toUpperCase();
+    if (mType.includes("CHURN") || mType.includes("CUSTOMER")) {
+      icon = Users;
+      iconBg = "bg-amber-50 text-amber-600 border-amber-200";
+      metricLabel = "Accuracy";
+      if (m.metrics?.accuracy) metricVal = `${(m.metrics.accuracy * 100).toFixed(1)}%`;
+    } else if (mType.includes("FORECAST") || mType.includes("DEMAND")) {
+      icon = TrendingUp;
+      iconBg = "bg-blue-50 text-blue-600 border-blue-200";
+      metricLabel = "MAPE";
+      if (m.metrics?.mape) metricVal = `${Number(m.metrics.mape).toFixed(1)}%`;
+    } else if (mType.includes("ANOMALY")) {
+      icon = AlertTriangle;
+      iconBg = "bg-indigo-50 text-indigo-600 border-indigo-200";
+      metricLabel = "F1-Score";
+      if (m.metrics?.f1_score) metricVal = `${(m.metrics.f1_score * 100).toFixed(1)}%`;
+    }
+
+    return {
+      id: m.id,
+      name: m.model_name,
+      version: m.version,
+      type: m.model_type,
+      icon,
+      iconBg,
+      status: m.status,
+      metricLabel,
+      metricValue: metricVal,
+      drift: m.drift_status || "Stable",
+      algorithm: m.parameters?.algorithm || m.model_name,
+    };
+  });
 
   const filteredCards =
     activeTab === "All Models"
       ? modelCards
-      : modelCards.filter((c) => c.type === activeTab);
+      : modelCards.filter((c) => (c.type || "").toLowerCase().includes(activeTab.toLowerCase()));
 
   return (
     <div className="space-y-6">
@@ -220,58 +217,68 @@ export default function ModelCenterPage() {
         ))}
       </div>
 
-      {/* Model Cards Grid matching mockup */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {filteredCards.map((model) => {
-          const Icon = model.icon;
-          return (
-            <div
-              key={model.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center border ${model.iconBg}`}
-                  >
-                    <Icon className="w-5 h-5" />
+      {/* Model Cards Grid */}
+      {filteredCards.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {filteredCards.map((model) => {
+            const Icon = model.icon;
+            return (
+              <div
+                key={model.id}
+                className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs hover:border-slate-300 transition"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center border ${model.iconBg}`}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-sm">
+                        {model.name}
+                      </h3>
+                      <span className="text-xs text-slate-400 font-mono">
+                        {model.version}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 text-sm">
-                      {model.name}
-                    </h3>
-                    <span className="text-xs text-slate-400 font-mono">
-                      {model.version}
+
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    {model.status}
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500 font-medium">
+                      {model.metricLabel}:
+                    </span>
+                    <span className="text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
+                      {model.metricValue}
                     </span>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  {model.status}
-                </div>
-              </div>
-
-              <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500 font-medium">
-                    {model.metricLabel}:
-                  </span>
-                  <span className="text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">
-                    {model.metricValue}
+                  <span className="text-xs text-slate-400">
+                    Drift: <span className="text-emerald-600 font-medium">{model.drift}</span>
                   </span>
                 </div>
-
-                <span className="text-xs text-slate-400">
-                  Drift: <span className="text-emerald-600 font-medium">{model.drift}</span>
-                </span>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="p-10 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+          <Cpu className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+          <p className="text-xs font-semibold text-slate-700">No machine learning models trained yet</p>
+          <p className="text-[11px] text-slate-400 max-w-sm mx-auto mt-0.5">
+            Import sales, customer, or inventory records in Data Management and click &quot;Retrain Classical&quot; or &quot;Train PyTorch Deep Learning&quot; to calibrate predictive models.
+          </p>
+        </div>
+      )}
 
-      {/* Model Performance Chart Section matching mockup */}
+      {/* Model Performance Chart Section */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -289,50 +296,58 @@ export default function ModelCenterPage() {
         </div>
 
         <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={performanceData}
-              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-            >
-              <defs>
-                <linearGradient id="colorAcc" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 12, fill: "#64748b" }}
-              />
-              <YAxis
-                domain={[80, 100]}
-                tickLine={false}
-                axisLine={false}
-                tick={{ fontSize: 12, fill: "#64748b" }}
-                unit="%"
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#ffffff",
-                  borderColor: "#e2e8f0",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey="accuracy"
-                stroke="#2563eb"
-                strokeWidth={2.5}
-                fillOpacity={1}
-                fill="url(#colorAcc)"
-                name="Accuracy Score (%)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          {performanceData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={performanceData}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="colorAcc" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12, fill: "#64748b" }}
+                />
+                <YAxis
+                  domain={[80, 100]}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fontSize: 12, fill: "#64748b" }}
+                  unit="%"
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#ffffff",
+                    borderColor: "#e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="accuracy"
+                  stroke="#2563eb"
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#colorAcc)"
+                  name="Accuracy Score (%)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+              <TrendingUp className="w-8 h-8 text-slate-300 mb-2" />
+              <p className="text-xs font-semibold text-slate-700">No performance history</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Historical quality metrics will track here after pipeline runs.</p>
+            </div>
+          )}
         </div>
       </div>
 
