@@ -34,6 +34,7 @@ interface ComponentStatus {
 }
 
 export default function StatusPage() {
+  const [isMounted, setIsMounted] = useState(false);
   const [lastChecked, setLastChecked] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [apiHealthStatus, setApiHealthStatus] = useState<"healthy" | "offline" | "checking">("healthy");
@@ -161,6 +162,7 @@ export default function StatusPage() {
   };
 
   useEffect(() => {
+    setIsMounted(true);
     checkHealth();
   }, []);
 
@@ -176,25 +178,25 @@ export default function StatusPage() {
   const pastIncidents = [
     {
       date: "Today",
-      formattedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      period: "Current 24h Window",
       status: "No incidents reported",
       details: "All systems operational. Scheduled telemetry and synthetic transaction health checks 100% nominal.",
     },
     {
       date: "Yesterday",
-      formattedDate: new Date(Date.now() - 86400000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      period: "Previous 24h Window",
       status: "No incidents reported",
       details: "Database query response latencies and background data import queues operating at peak throughput.",
     },
     {
       date: "2 days ago",
-      formattedDate: new Date(Date.now() - 86400000 * 2).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      period: "Past 48h Window",
       status: "Completed Maintenance",
       details: "Routine Neon database connection pool maintenance completed with zero observed downtime.",
     },
     {
       date: "3 days ago",
-      formattedDate: new Date(Date.now() - 86400000 * 3).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      period: "Past 72h Window",
       status: "No incidents reported",
       details: "All ML model training and inference pipelines functioning within SLA parameters.",
     },
@@ -257,8 +259,11 @@ export default function StatusPage() {
             </div>
             <div>
               <span className="text-xs text-slate-400 block font-medium">Last Probed</span>
-              <span className="text-xs sm:text-sm font-bold text-slate-800 tracking-tight mt-1 block">
-                {lastChecked.toLocaleTimeString()}
+              <span
+                suppressHydrationWarning
+                className="text-xs sm:text-sm font-bold text-slate-800 tracking-tight mt-1 block"
+              >
+                {isMounted ? lastChecked.toLocaleTimeString() : "Just now"}
               </span>
               <span className="text-[11px] text-slate-400 block mt-0.5">Automated Heartbeat</span>
             </div>
@@ -391,7 +396,7 @@ export default function StatusPage() {
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-slate-900">{incident.date}</span>
                     <span className="text-slate-400">•</span>
-                    <span className="text-slate-500">{incident.formattedDate}</span>
+                    <span className="text-slate-500">{incident.period}</span>
                   </div>
                   <span
                     className={`font-semibold text-[11px] px-2 py-0.5 rounded-full ${
