@@ -161,86 +161,96 @@ def execute_grounded_copilot_turn(
             print(f"Gemini API invocation fallback to local grounded engine: {gemini_err}")
             assistant_content = ""
 
-    # Grounded reasoning fallback matching mockup exactly
+    # Grounded reasoning fallback using verified database records
     if not assistant_content:
         if any(w in lower_query for w in ["why", "decline", "drop", "revenue", "sales", "last month", "growth"]):
             total_rev = sales_info.get("total_sales", 0.0)
             gp = sales_info.get("gross_profit", 0.0)
             gm = sales_info.get("gross_margin_percentage", 0.0)
-            growth = sales_info.get("growth_rate_percentage", -12.5)
+            growth = sales_info.get("sales_growth_rate", 0.0)
 
-            # Structure answer matching the mockup
-            assistant_content = (
-                f"Your revenue declined by {abs(growth):.1f}% compared to the previous period.\n\n"
-                "The main reasons are:\n"
-                "• Lower sales volume in the Electronics category (-18.0%)\n"
-                "• Increased return activity across seasonal accounts (7.2%)\n"
-                "• Seasonal demand deceleration in your regional market\n\n"
-                f"Current verified metrics: Total Revenue ${total_rev:,.2f}, Gross Profit ${gp:,.2f} ({gm:.1f}% Gross Margin)."
-            )
-
-            chart_payload = {
-                "type": "bar",
-                "title": "Revenue Comparison by Month & Segment",
-                "data": [
-                    {"period": "Jan", "revenue": 180000},
-                    {"period": "Feb", "revenue": 210000},
-                    {"period": "Mar", "revenue": 248750},
-                    {"period": "Apr", "revenue": 217650},
-                    {"period": "May", "revenue": 225000},
-                    {"period": "Jun", "revenue": 196800},
-                    {"period": "Jul", "revenue": 248750},
-                ],
-                "xKey": "period",
-                "yKey": "revenue",
-                "unit": "$"
-            }
-
-            grounding_sources = [
-                {"table": "sales_orders", "metric": "total_sales", "verified_value": total_rev},
-                {"table": "sales_order_items", "metric": "category_breakdown", "verified_value": "Electronics drop"},
-                {"table": "audit_logs", "metric": "period_comparison", "verified_value": f"{growth}%"}
-            ]
+            if total_rev == 0:
+                assistant_content = (
+                    "No historical sales orders or revenue transactions have been recorded for your organization yet.\n\n"
+                    "Once you import your sales data via CSV or Excel, I will provide grounded causal attribution, "
+                    "category-level margin breakdowns, and period-over-period growth trajectories."
+                )
+                chart_payload = None
+                grounding_sources = [
+                    {"table": "sales_orders", "metric": "total_sales", "verified_value": 0.0}
+                ]
+            else:
+                assistant_content = (
+                    f"Your verified revenue for the period is ${total_rev:,.2f} with a period-over-period growth rate of {growth:+.1f}%.\n\n"
+                    f"• Gross Profit: ${gp:,.2f} ({gm:.1f}% Gross Margin)\n"
+                    f"• Total Orders: {sales_info.get('total_orders', 0)}\n"
+                    f"• Average Order Value: ${sales_info.get('average_order_value', 0.0):,.2f}"
+                )
+                sales_trend = sales_info.get("sales_trend", [])
+                if sales_trend:
+                    chart_payload = {
+                        "type": "bar",
+                        "title": "Revenue Performance",
+                        "data": sales_trend,
+                        "xKey": "date",
+                        "yKey": "sales",
+                        "unit": "$"
+                    }
+                grounding_sources = [
+                    {"table": "sales_orders", "metric": "total_sales", "verified_value": total_rev},
+                    {"table": "sales_orders", "metric": "gross_profit", "verified_value": gp}
+                ]
             tool_calls = [{"tool": "query_sales_grounding", "parameters": {"date_range": "30d"}}]
 
         elif any(w in lower_query for w in ["inventory", "stock", "stockout", "reorder"]):
-            low_stock = inv_info.get("stockout_risk_items", 0)
-            total_inv = inv_info.get("total_inventory_items", 0)
-            val = inv_info.get("total_inventory_value", 0.0)
+            low_stock = inv_info.get("stockout_alerts_count", 0)
+            total_skus = inv_info.get("total_skus", 0)
+            val = inv_info.get("total_inventory_valuation", 0.0)
 
-            assistant_content = (
-                f"Your current inventory health report shows {low_stock} product(s) at or below reorder threshold out of {total_inv} catalog items.\n\n"
-                f"Total inventory valuation is currently ${val:,.2f}.\n"
-                "Recommendation: Trigger reorders for flagged SKUs immediately to avoid potential fulfillment delays."
-            )
+            if total_skus == 0:
+                assistant_content = (
+                    "No inventory items or catalog products have been registered yet.\n\n"
+                    "Upload your product master file and opening stock balances in Data Ingestion to activate automated stockout surveillance."
+                )
+            else:
+                assistant_content = (
+                    f"Your inventory health report monitors {total_skus} catalog items.\n\n"
+                    f"• Active Stockout Alerts: {low_stock}\n"
+                    f"• Total Inventory Valuation: ${val:,.2f}\n"
+                )
+                if low_stock > 0:
+                    assistant_content += "\nRecommendation: Trigger reorders for flagged SKUs to prevent fulfillment stockouts."
             grounding_sources = [
-                {"table": "products", "metric": "reorder_point", "verified_value": low_stock},
-                {"table": "inventory_transactions", "metric": "total_value", "verified_value": val}
+                {"table": "products", "metric": "total_skus", "verified_value": total_skus},
+                {"table": "inventory_transactions", "metric": "valuation", "verified_value": val}
             ]
             tool_calls = [{"tool": "query_inventory_grounding", "parameters": {}}]
 
         elif any(w in lower_query for w in ["churn", "customer", "retention"]):
-            risk_count = cust_info.get("churn_risk_accounts", 0)
             total_cust = cust_info.get("total_customers", 0)
-            aov = cust_info.get("average_order_value", 0.0)
-
-            assistant_content = (
-                f"Based on our trained churn classification model, {risk_count} account(s) are currently flagged with HIGH or CRITICAL churn risk.\n\n"
-                f"The overall customer base stands at {total_cust} accounts with an Average Order Value of ${aov:,.2f}.\n"
-                "Recommended Action: Review customer intelligence account list and deploy targeted retention discounts."
-            )
+            if total_cust == 0:
+                assistant_content = (
+                    "No customer profiles have been imported yet. Import customer transactional histories to compute Customer Lifetime Value (CLV) and churn probabilities."
+                )
+            else:
+                assistant_content = (
+                    f"Your customer intelligence database currently tracks {total_cust} registered customer accounts."
+                )
             grounding_sources = [
-                {"table": "customers", "metric": "churn_risk_score", "verified_value": risk_count},
-                {"table": "ml_predictions", "metric": "customer_churn", "verified_value": "RandomForest"}
+                {"table": "customers", "metric": "total_customers", "verified_value": total_cust}
             ]
             tool_calls = [{"tool": "query_customer_grounding", "parameters": {}}]
 
         elif any(w in lower_query for w in ["anomaly", "suspicious", "fraud", "risk"]):
             anom_count = len(anom_info)
-            assistant_content = (
-                f"Our Isolation Forest surveillance engine has identified {anom_count} open transaction anomalies requiring review.\n\n"
-                "Major anomaly: Transaction ORD-905 deviates substantially from baseline margin expectations (margin compressed below nominal 10.0%)."
-            )
+            if anom_count == 0:
+                assistant_content = (
+                    "No anomalous transactions or margin compressions detected. All verified transactions are operating within standard tolerance thresholds."
+                )
+            else:
+                assistant_content = (
+                    f"Our Isolation Forest anomaly detection engine has flagged {anom_count} transaction(s) requiring operational review."
+                )
             grounding_sources = [
                 {"table": "anomalies", "metric": "open_count", "verified_value": anom_count}
             ]
@@ -250,12 +260,13 @@ def execute_grounded_copilot_turn(
             total_rev = sales_info.get("total_sales", 0.0)
             gp = sales_info.get("gross_profit", 0.0)
             gm = sales_info.get("gross_margin_percentage", 0.0)
+            prod_count = inv_info.get("total_skus", 0)
             assistant_content = (
                 f"I am ready to assist you with MarginPilot AI operational data.\n\n"
                 f"Here is your real-time organizational snapshot:\n"
                 f"• Total Sales (Last 30 Days): ${total_rev:,.2f}\n"
                 f"• Gross Profit: ${gp:,.2f} ({gm:.1f}% Margin)\n"
-                f"• Catalog SKUs: {sales_info.get('total_catalog_products', 0)}\n\n"
+                f"• Catalog SKUs: {prod_count}\n\n"
                 "You can ask me about revenue drops, inventory reorder risks, demand forecasts, customer churn, or transaction anomalies."
             )
             grounding_sources = [

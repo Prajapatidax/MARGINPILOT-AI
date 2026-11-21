@@ -22,10 +22,29 @@ def simulate_business_scenario(
     using actual database records.
     """
     sales = get_sales_analytics(db, org_id, "30d")
-    current_rev = max(sales.get("total_sales", 0.0), 248750.0)
-    current_profit = max(sales.get("gross_profit", 0.0), 92430.0)
-    current_cogs = current_rev - current_profit
+    current_rev = float(sales.get("total_sales", 0.0))
+    current_profit = float(sales.get("gross_profit", 0.0))
+    current_cogs = max(current_rev - current_profit, 0.0)
     stype = scenario_type.upper()
+
+    if current_rev <= 0:
+        return {
+            "scenario_type": stype,
+            "parameter_change_pct": change_pct,
+            "expected_revenue_change_pct": 0.0,
+            "expected_profit_change_pct": 0.0,
+            "expected_gross_margin_pct": 0.0,
+            "projected_stockout_risk_pct": 0.0,
+            "current_revenue": 0.0,
+            "simulated_revenue": 0.0,
+            "current_profit": 0.0,
+            "simulated_profit": 0.0,
+            "curve": [
+                {"step": "Baseline", "revenue": 0.0, "profit": 0.0, "margin": 0.0},
+                {"step": "Target", "revenue": 0.0, "profit": 0.0, "margin": 0.0},
+            ],
+            "executive_summary": "No historical commercial transactions detected yet. Import your sales orders or product catalog to run simulations on real data."
+        }
 
     if stype == "PRICING":
         # Price change e.g. -10%
