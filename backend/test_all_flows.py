@@ -138,6 +138,7 @@ def run_all_flow_checks():
     res_me = client.get("/api/v1/auth/me", headers=headers)
     assert res_me.status_code == 200, f"/auth/me failed: {res_me.text}"
     me_data = res_me.json()
+    assert me_data["is_verified"] is True, "User is_verified should be True in /auth/me!"
     print(f"  [PASS] GET /api/v1/auth/me -> Authenticated as: {me_data['email']} (Verified: {me_data['is_verified']})")
 
     # -------------------------------------------------------------

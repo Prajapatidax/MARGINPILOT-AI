@@ -19,6 +19,7 @@ api_router.include_router(data_imports.router, prefix="/data-imports", tags=["Da
 api_router.include_router(ml.router, prefix="/ml", tags=["Machine Learning & AI"])
 api_router.include_router(copilot.router, prefix="/copilot", tags=["AI Copilot & Generative Intelligence"])
 api_router.include_router(simulator.router, prefix="/simulator", tags=["Decision Simulation"])
+api_router.include_router(simulator.router, prefix="/simulation", tags=["Decision Simulation"])
 api_router.include_router(recommendations.router, prefix="/recommendations", tags=["AI Recommendations"])
 
 

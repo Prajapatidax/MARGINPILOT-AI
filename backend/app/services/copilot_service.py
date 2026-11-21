@@ -134,7 +134,10 @@ def execute_grounded_copilot_turn(
             from google import genai
             from google.genai import types
 
-            client = genai.Client(api_key=settings.GEMINI_API_KEY)
+            client = genai.Client(
+                api_key=settings.GEMINI_API_KEY,
+                http_options=types.HttpOptions(api_version="v1beta")
+            )
             system_instruction = (
                 "You are MarginPilot AI Business Copilot. You are an expert financial and business operations advisor. "
                 "CRITICAL PRINCIPLE: Never invent or hallucinate metrics or numbers. Every number must strictly derive "
