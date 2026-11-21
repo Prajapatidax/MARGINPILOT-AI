@@ -22,29 +22,12 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-
-interface CountryOption {
-  name: string;
-  code: string;
-  flag: string;
-  currency: string;
-  timezone: string;
-}
-
-const COUNTRIES: CountryOption[] = [
-  { name: "United States", code: "US", flag: "🇺🇸", currency: "USD", timezone: "America/New_York (EST -5:00)" },
-  { name: "India", code: "IN", flag: "🇮🇳", currency: "INR", timezone: "Asia/Kolkata (IST +5:30)" },
-  { name: "United Kingdom", code: "GB", flag: "🇬🇧", currency: "GBP", timezone: "Europe/London (GMT +0:00)" },
-  { name: "Germany / European Union", code: "DE", flag: "🇪🇺", currency: "EUR", timezone: "Europe/Berlin (CET +1:00)" },
-  { name: "Canada", code: "CA", flag: "🇨🇦", currency: "CAD", timezone: "America/Toronto (EST -5:00)" },
-  { name: "Australia", code: "AU", flag: "🇦🇺", currency: "AUD", timezone: "Australia/Sydney (AEST +10:00)" },
-  { name: "Japan", code: "JP", flag: "🇯🇵", currency: "JPY", timezone: "Asia/Tokyo (JST +9:00)" },
-  { name: "Singapore", code: "SG", flag: "🇸🇬", currency: "SGD", timezone: "Asia/Singapore (SGT +8:00)" },
-  { name: "United Arab Emirates", code: "AE", flag: "🇦🇪", currency: "AED", timezone: "Asia/Dubai (GST +4:00)" },
-  { name: "Switzerland", code: "CH", flag: "🇨🇭", currency: "CHF", timezone: "Europe/Zurich (CET +1:00)" },
-  { name: "Brazil", code: "BR", flag: "🇧🇷", currency: "BRL", timezone: "America/Sao_Paulo (BRT -3:00)" },
-  { name: "South Africa", code: "ZA", flag: "🇿🇦", currency: "ZAR", timezone: "Africa/Johannesburg (SAST +2:00)" },
-];
+import {
+  COUNTRIES,
+  CountryCurrency,
+  findCountryCurrency,
+  formatPlanPrice,
+} from "@/lib/currencies";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -60,12 +43,18 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
 
   // Organization Settings (Task 2)
+  const initialCurrency = searchParams.get("currency") || "USD";
+  const initialCountry =
+    COUNTRIES.find((c) => c.code.toUpperCase() === initialCurrency.toUpperCase()) || COUNTRIES[0];
+
   const [organizationName, setOrganizationName] = useState("");
   const [businessType, setBusinessType] = useState<string>("RETAIL");
-  const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRIES[0]);
-  const [currency, setCurrency] = useState<string>("USD");
-  const [timezone, setTimezone] = useState<string>("America/New_York (EST -5:00)");
-  const [fiscalYearStart, setFiscalYearStart] = useState<string>("January");
+  const [selectedCountry, setSelectedCountry] = useState<CountryCurrency>(initialCountry);
+  const [currency, setCurrency] = useState<string>(initialCountry.code);
+  const [timezone, setTimezone] = useState<string>(initialCountry.timezone);
+  const [fiscalYearStart, setFiscalYearStart] = useState<string>(
+    initialCountry.countryCode === "IN" || initialCountry.countryCode === "GB" ? "April" : "January"
+  );
 
   // Subscription Plan (Task 4)
   const initialPlan = searchParams.get("plan")?.toUpperCase() || "GROWTH";
@@ -83,14 +72,26 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleCountryChange = (countryName: string) => {
-    const found = COUNTRIES.find((c) => c.name === countryName) || COUNTRIES[0];
+    const found = COUNTRIES.find((c) => c.country === countryName) || COUNTRIES[0];
     setSelectedCountry(found);
-    setCurrency(found.currency);
+    setCurrency(found.code);
     setTimezone(found.timezone);
-    if (found.code === "IN" || found.code === "GB") {
+    if (found.countryCode === "IN" || found.countryCode === "GB") {
       setFiscalYearStart("April");
     } else {
       setFiscalYearStart("January");
+    }
+  };
+
+  const handleCurrencyChange = (newCurrencyCode: string) => {
+    setCurrency(newCurrencyCode);
+    const matching = COUNTRIES.find((c) => c.code === newCurrencyCode);
+    if (matching) {
+      setSelectedCountry(matching);
+      setTimezone(matching.timezone);
+      if (matching.countryCode === "IN" || matching.countryCode === "GB") {
+        setFiscalYearStart("April");
+      }
     }
   };
 
@@ -105,7 +106,7 @@ export default function RegisterPage() {
         fullName,
         organizationName,
         businessType,
-        country: selectedCountry.name,
+        country: selectedCountry.country,
         currency,
         timezone,
         subscriptionPlan,
@@ -323,13 +324,13 @@ export default function RegisterPage() {
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700">Country / Operating Region *</label>
                 <select
-                  value={selectedCountry.name}
+                  value={selectedCountry.country}
                   onChange={(e) => handleCountryChange(e.target.value)}
                   className="w-full px-3 py-2.5 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
                 >
                   {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.name}>
-                      {c.flag} {c.name} ({c.code})
+                    <option key={c.countryCode} value={c.country}>
+                      {c.flag} {c.country} ({c.countryCode})
                     </option>
                   ))}
                 </select>
@@ -341,21 +342,14 @@ export default function RegisterPage() {
                 <label className="block text-xs font-bold text-slate-700">Reporting Currency *</label>
                 <select
                   value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
+                  onChange={(e) => handleCurrencyChange(e.target.value)}
                   className="w-full px-3 py-2.5 text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
                 >
-                  <option value="USD">USD ($)</option>
-                  <option value="INR">INR (₹)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                  <option value="CAD">CAD (CA$)</option>
-                  <option value="AUD">AUD (A$)</option>
-                  <option value="JPY">JPY (¥)</option>
-                  <option value="SGD">SGD (S$)</option>
-                  <option value="AED">AED (AED)</option>
-                  <option value="CHF">CHF (CHF)</option>
-                  <option value="BRL">BRL (R$)</option>
-                  <option value="ZAR">ZAR (R)</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} ({c.symbol.trim()}) — {c.country}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -402,11 +396,12 @@ export default function RegisterPage() {
         {step === 3 && (
           <div className="space-y-5 animate-in fade-in">
             <div className="text-center space-y-1 pb-1">
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-                ⚡ 14-Day Free Trial Included
-              </span>
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                <Zap className="w-3.5 h-3.5" />
+                <span>14-Day Free Trial • {formatPlanPrice(0, currency, selectedCountry.country)} Due Today</span>
+              </div>
               <p className="text-xs text-slate-500 pt-1">
-                Select your preferred tier. No charge today. Your 14-day countdown starts upon workspace creation.
+                Prices shown in {currency} ({findCountryCurrency(currency, selectedCountry.country).symbol.trim()}) for {selectedCountry.country}. 14-day free trial starts today.
               </p>
             </div>
 
@@ -431,7 +426,9 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <div className="mt-2">
-                  <span className="text-lg font-black text-slate-900">$159</span>
+                  <span className="text-lg font-black text-slate-900">
+                    {formatPlanPrice(159, currency, selectedCountry.country)}
+                  </span>
                   <span className="text-[10px] text-slate-400"> /mo</span>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-2">
@@ -462,7 +459,9 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <div className="mt-2">
-                  <span className="text-lg font-black text-slate-900">$399</span>
+                  <span className="text-lg font-black text-slate-900">
+                    {formatPlanPrice(399, currency, selectedCountry.country)}
+                  </span>
                   <span className="text-[10px] text-slate-400"> /mo</span>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-2">
@@ -490,7 +489,9 @@ export default function RegisterPage() {
                   </div>
                 </div>
                 <div className="mt-2">
-                  <span className="text-lg font-black text-slate-900">$1,049</span>
+                  <span className="text-lg font-black text-slate-900">
+                    {formatPlanPrice(1049, currency, selectedCountry.country)}
+                  </span>
                   <span className="text-[10px] text-slate-400"> /mo</span>
                 </div>
                 <p className="text-[11px] text-slate-500 mt-2">

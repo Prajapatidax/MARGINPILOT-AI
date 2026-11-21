@@ -27,21 +27,7 @@ import {
   Download,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-
-const COUNTRIES = [
-  { name: "United States", flag: "🇺🇸", currency: "USD", timezone: "America/New_York (EST -5:00)" },
-  { name: "India", flag: "🇮🇳", currency: "INR", timezone: "Asia/Kolkata (IST +5:30)" },
-  { name: "United Kingdom", flag: "🇬🇧", currency: "GBP", timezone: "Europe/London (GMT +0:00)" },
-  { name: "Germany / European Union", flag: "🇪🇺", currency: "EUR", timezone: "Europe/Berlin (CET +1:00)" },
-  { name: "Canada", flag: "🇨🇦", currency: "CAD", timezone: "America/Toronto (EST -5:00)" },
-  { name: "Australia", flag: "🇦🇺", currency: "AUD", timezone: "Australia/Sydney (AEST +10:00)" },
-  { name: "Japan", flag: "🇯🇵", currency: "JPY", timezone: "Asia/Tokyo (JST +9:00)" },
-  { name: "Singapore", flag: "🇸🇬", currency: "SGD", timezone: "Asia/Singapore (SGT +8:00)" },
-  { name: "United Arab Emirates", flag: "🇦🇪", currency: "AED", timezone: "Asia/Dubai (GST +4:00)" },
-  { name: "Switzerland", flag: "🇨🇭", currency: "CHF", timezone: "Europe/Zurich (CET +1:00)" },
-  { name: "Brazil", flag: "🇧🇷", currency: "BRL", timezone: "America/Sao_Paulo (BRT -3:00)" },
-  { name: "South Africa", flag: "🇿🇦", currency: "ZAR", timezone: "Africa/Johannesburg (SAST +2:00)" },
-];
+import { COUNTRIES, formatPlanPrice } from "@/lib/currencies";
 
 export default function SettingsPage() {
   const searchParams = useSearchParams();
@@ -253,17 +239,17 @@ export default function SettingsPage() {
                       value={country}
                       onChange={(e) => {
                         setCountry(e.target.value);
-                        const match = COUNTRIES.find((c) => c.name === e.target.value);
+                        const match = COUNTRIES.find((c) => c.country === e.target.value);
                         if (match) {
-                          setCurrency(match.currency);
+                          setCurrency(match.code);
                           setTimezone(match.timezone);
                         }
                       }}
                       className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {COUNTRIES.map((c) => (
-                        <option key={c.name} value={c.name}>
-                          {c.flag} {c.name}
+                        <option key={c.countryCode} value={c.country}>
+                          {c.flag} {c.country} ({c.code})
                         </option>
                       ))}
                     </select>
@@ -431,23 +417,23 @@ export default function SettingsPage() {
                     {
                       name: "Starter",
                       tier: "STARTER",
-                      annual: "$159",
-                      monthly: "$199",
+                      annual: formatPlanPrice(159, currency, country),
+                      monthly: formatPlanPrice(199, currency, country),
                       features: ["25k monthly order lines", "POS & sales analytics", "Email support (24h SLA)"],
                     },
                     {
                       name: "Growth",
                       tier: "GROWTH",
-                      annual: "$399",
-                      monthly: "$499",
+                      annual: formatPlanPrice(399, currency, country),
+                      monthly: formatPlanPrice(499, currency, country),
                       popular: true,
                       features: ["250k monthly order lines", "XGBoost customer churn", "PyTorch deep learning & Copilot"],
                     },
                     {
                       name: "Enterprise",
                       tier: "ENTERPRISE",
-                      annual: "$1,049",
-                      monthly: "$1,299",
+                      annual: formatPlanPrice(1049, currency, country),
+                      monthly: formatPlanPrice(1299, currency, country),
                       features: ["Unlimited records", "Multi-warehouse BOM", "Dedicated support & 99.9% SLA"],
                     },
                   ].map((plan) => (
@@ -535,7 +521,16 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-semibold text-slate-700">Plan Amount</span>
                         <span className="font-black text-slate-900">
-                          {selectedPlanTier === "STARTER" ? "$159/mo" : selectedPlanTier === "GROWTH" ? "$399/mo" : "$1,049/mo"}
+                          {formatPlanPrice(
+                            selectedPlanTier === "STARTER"
+                              ? billingCycle === "annual" ? 159 : 199
+                              : selectedPlanTier === "GROWTH"
+                              ? billingCycle === "annual" ? 399 : 499
+                              : billingCycle === "annual" ? 1049 : 1299,
+                            currency,
+                            country
+                          )}
+                          /mo
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
@@ -544,7 +539,9 @@ export default function SettingsPage() {
                       </div>
                       <div className="flex items-center justify-between text-xs pt-2 border-t border-blue-200">
                         <span className="font-bold text-blue-900">Due Today</span>
-                        <span className="font-black text-blue-900 text-base">$0.00 (14-Day Free Trial)</span>
+                        <span className="font-black text-blue-900 text-base">
+                          {formatPlanPrice(0, currency, country)} (14-Day Free Trial)
+                        </span>
                       </div>
                     </div>
 
