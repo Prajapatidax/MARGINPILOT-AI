@@ -11,6 +11,8 @@ from app.models.sales_order import SalesOrder, SalesOrderItem
 from app.models.inventory import InventoryTransaction
 from app.models.data_import import DataImportJob, ImportStatus
 from app.models.ml_models import MLModelVersion, MLPrediction, Anomaly, ModelStatus, DriftStatus
+from app.models.copilot import AIConversation, AIMessage
+from app.models.recommendation import AIRecommendation
 
 __all__ = [
     "User",
@@ -37,4 +39,9 @@ __all__ = [
     "Anomaly",
     "ModelStatus",
     "DriftStatus",
+    "AIConversation",
+    "AIMessage",
+    "AIRecommendation",
 ]
+
+

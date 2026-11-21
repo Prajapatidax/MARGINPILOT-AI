@@ -2,7 +2,7 @@
   "experiment_name": "customer_churn_exp",
   "model_name": "customer_churn",
   "version": "1.2.0",
-  "timestamp": "2026-11-21T07:29:42.751608+00:00",
+  "timestamp": "2026-11-21T07:44:56.812252+00:00",
   "params": {
     "n_estimators": 50,
     "max_depth": 4,
@@ -12,5 +12,5 @@
     "accuracy": 1.0,
     "f1_score": 1.0
   },
-  "artifact_path": "artifacts/ml_models\\e881215b-3971-4d45-afe3-61985dfbf91e_churn_rf.joblib"
+  "artifact_path": "artifacts/ml_models\\81e7a089-b11d-4d71-9950-24b39f3c6d3e_churn_rf.joblib"
 }

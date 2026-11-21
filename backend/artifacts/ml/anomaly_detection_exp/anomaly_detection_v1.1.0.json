@@ -2,7 +2,7 @@
   "experiment_name": "anomaly_detection_exp",
   "model_name": "anomaly_detection",
   "version": "1.1.0",
-  "timestamp": "2026-11-21T07:29:42.954150+00:00",
+  "timestamp": "2026-11-21T07:44:56.979815+00:00",
   "params": {
     "contamination": 0.08,
     "algorithm": "IsolationForest"
@@ -12,5 +12,5 @@
     "precision": 0.95,
     "contamination_rate": 0.08
   },
-  "artifact_path": "artifacts/ml_models\\e881215b-3971-4d45-afe3-61985dfbf91e_isolation_forest.joblib"
+  "artifact_path": "artifacts/ml_models\\81e7a089-b11d-4d71-9950-24b39f3c6d3e_isolation_forest.joblib"
 }

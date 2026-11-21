@@ -2,7 +2,7 @@
   "experiment_name": "demand_forecasting_exp",
   "model_name": "demand_forecast",
   "version": "2.0.0",
-  "timestamp": "2026-11-21T07:29:42.803150+00:00",
+  "timestamp": "2026-11-21T07:44:56.849860+00:00",
   "params": {
     "max_iter": 50,
     "algorithm": "HistGradientBoostingRegressor",
@@ -17,5 +17,5 @@
     "rmse": 6.11,
     "accuracy_pct": 62.6
   },
-  "artifact_path": "artifacts/ml_models\\e881215b-3971-4d45-afe3-61985dfbf91e_demand_regressor.joblib"
+  "artifact_path": "artifacts/ml_models\\81e7a089-b11d-4d71-9950-24b39f3c6d3e_demand_regressor.joblib"
 }

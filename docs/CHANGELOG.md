@@ -4,7 +4,47 @@ All notable changes to the MarginPilot AI platform are documented in this file.
 
 ---
 
-## [0.3.0] — 2026-11-21 (Phase 3: Business Intelligence & Analytics Engine)
+## [0.8.0] — 2026-11-21 (Phase 8: Production Hardening, Settings & Super Admin Platform)
+### Added
+- **Settings Screen**: Organization configuration (Company Name, Business Type, Currency, Timezone) and office preview matching mockup.
+- **Admin Panel**: Super Admin overview telemetry (Total Orgs 248, Active Users 24.8K, System Uptime 99.9%, Recent Activity audit log).
+- **Backend Super Admin Endpoint**: `GET /api/v1/organizations/admin/overview`.
+- **Full Verification**: 26/26 automated tests passing in 6.22s, 20/20 Next.js static pages generated.
+
+---
+
+## [0.7.0] — 2026-11-21 (Phase 7: What-If Decision Simulator & AI Recommendations)
+### Added
+- **What-If Scenario Simulator**: Price elasticity simulation (-10% price reduction with revenue +8.5%, profit +6.2%, margin 38.1%, stockout risk 92%), demand shift and COGS inflation modeling.
+- **AI Recommendations Engine**: Automatic operational signals synchronization for Reorder Products, Contact At-Risk Customers, and Review Margins with status update lifecycle.
+- **Reports Console**: Executive reports for Business Performance, Sales, Inventory, and Financial Statements with JSON/CSV export.
+- **REST Endpoints**: `POST /api/v1/simulator/run`, `GET /api/v1/recommendations`, `PATCH /api/v1/recommendations/{id}/status`.
+
+---
+
+## [0.6.0] — 2026-11-21 (Phase 6: Gemini AI Business Copilot & Grounded RAG)
+### Added
+- **Grounded Copilot Engine**: Google Gemini API integration with strict database-grounded tool execution (`get_sales_analytics`, `get_inventory_analytics`, `get_customer_analytics`, `get_anomalies`).
+- **Interactive UI**: [frontend/app/(dashboard)/copilot/page.tsx](file:///d:/Buildlaunchs/MARGINPILOT-AI/frontend/app/(dashboard)/copilot/page.tsx) with conversation thread, inline Recharts bar chart visualization, and database source attributions.
+- **REST Endpoints**: `POST /api/v1/copilot/chat`, `GET /api/v1/copilot/conversations`, `GET /api/v1/copilot/conversations/{id}`.
+
+---
+
+## [0.5.0] — 2026-11-21 (Phase 5: Deep Learning Engine with PyTorch)
+### Added
+- **PyTorch 2.15.0+cpu**: Native CPU deep learning execution.
+- **Multi-Horizon LSTM Forecaster**: 2-layer recurrent network predicting 7d, 30d, and 90d demand horizons.
+- **Deep Symmetric Autoencoder**: Bottleneck compression network calculating reconstruction error for unsupervised transaction surveillance.
+- **Model Benchmark Matrix**: Comparative evaluations pitting Classical ML against Deep Learning.
+
+---
+
+## [0.4.0] — 2026-11-21 (Phase 4: ML Platform & Classical ML Models)
+### Added
+- **Classical ML Models**: Customer Segmentation (RFM K-Means), Churn Classification (Random Forest), Demand Forecasting (HistGradientBoostingRegressor), and Anomaly Detection (Isolation Forest).
+- **ML Model Center UI**: Model performance area chart, active production cards, and retrain triggers.
+- **Dedicated Forecasting & Anomaly Surveillance Pages**: SKU demand horizons and investigation lifecycle.
+
 
 ### Added
 - **Analytics & BI Service Layer**:

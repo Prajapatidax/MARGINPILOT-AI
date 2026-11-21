@@ -31,3 +31,9 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# ML artifacts
+*.joblib
+*.pt
+backend/artifacts/ml_models/
+
