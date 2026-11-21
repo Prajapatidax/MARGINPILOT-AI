@@ -39,3 +39,30 @@ export async function apiClient<T>(endpoint: string, options: RequestOptions = {
 
   return response.json();
 }
+
+export const api = {
+  get: async <T = any>(endpoint: string, params?: Record<string, string>) => {
+    const data = await apiClient<T>(endpoint, { method: "GET", params });
+    return { data };
+  },
+  post: async <T = any>(endpoint: string, body?: any) => {
+    const data = await apiClient<T>(endpoint, {
+      method: "POST",
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return { data };
+  },
+  patch: async <T = any>(endpoint: string, body?: any) => {
+    const data = await apiClient<T>(endpoint, {
+      method: "PATCH",
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return { data };
+  },
+  delete: async <T = any>(endpoint: string) => {
+    const data = await apiClient<T>(endpoint, { method: "DELETE" });
+    return { data };
+  },
+};
+
+export default api;

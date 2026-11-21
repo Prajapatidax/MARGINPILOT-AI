@@ -1,0 +1,18 @@
+{
+  "experiment_name": "autoencoder_anomaly_exp",
+  "model_name": "deep_autoencoder_anomaly",
+  "version": "1.3.0-dl",
+  "timestamp": "2026-11-21T07:29:40.251683+00:00",
+  "params": {
+    "input_dim": 4,
+    "latent_dim": 2,
+    "architecture": "Deep Symmetric Autoencoder"
+  },
+  "metrics": {
+    "reconstruction_loss": 3.6412,
+    "anomaly_threshold": 8.3373,
+    "f1_score": 0.952,
+    "latent_dimension": 2
+  },
+  "artifact_path": "artifacts/ml_models\\c30614dd-5e63-4009-81b5-de205bbfbe66_deep_autoencoder.pt"
+}

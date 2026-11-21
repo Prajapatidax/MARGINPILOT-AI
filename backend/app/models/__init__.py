@@ -10,6 +10,7 @@ from app.models.warehouse import Warehouse
 from app.models.sales_order import SalesOrder, SalesOrderItem
 from app.models.inventory import InventoryTransaction
 from app.models.data_import import DataImportJob, ImportStatus
+from app.models.ml_models import MLModelVersion, MLPrediction, Anomaly, ModelStatus, DriftStatus
 
 __all__ = [
     "User",
@@ -31,4 +32,9 @@ __all__ = [
     "InventoryTransaction",
     "DataImportJob",
     "ImportStatus",
+    "MLModelVersion",
+    "MLPrediction",
+    "Anomaly",
+    "ModelStatus",
+    "DriftStatus",
 ]

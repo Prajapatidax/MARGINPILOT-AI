@@ -1,0 +1,21 @@
+{
+  "experiment_name": "demand_forecasting_exp",
+  "model_name": "demand_forecast",
+  "version": "2.0.0",
+  "timestamp": "2026-11-21T07:29:42.803150+00:00",
+  "params": {
+    "max_iter": 50,
+    "algorithm": "HistGradientBoostingRegressor",
+    "horizons": [
+      7,
+      30,
+      90
+    ]
+  },
+  "metrics": {
+    "mape": 0.374,
+    "rmse": 6.11,
+    "accuracy_pct": 62.6
+  },
+  "artifact_path": "artifacts/ml_models\\e881215b-3971-4d45-afe3-61985dfbf91e_demand_regressor.joblib"
+}

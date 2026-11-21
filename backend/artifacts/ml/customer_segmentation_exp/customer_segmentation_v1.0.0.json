@@ -1,0 +1,21 @@
+{
+  "experiment_name": "customer_segmentation_exp",
+  "model_name": "customer_segmentation",
+  "version": "1.0.0",
+  "timestamp": "2026-11-21T07:29:42.586461+00:00",
+  "params": {
+    "n_clusters": 3,
+    "algorithm": "K-Means",
+    "features": [
+      "recency",
+      "frequency",
+      "monetary",
+      "aov"
+    ]
+  },
+  "metrics": {
+    "silhouette_score": 0.084,
+    "inertia": 2.6928579793968535
+  },
+  "artifact_path": "artifacts/ml_models\\e881215b-3971-4d45-afe3-61985dfbf91e_kmeans_segmentation.joblib"
+}
