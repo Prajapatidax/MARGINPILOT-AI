@@ -3,10 +3,10 @@
 
 MarginPilot AI is a production-oriented, multi-tenant SaaS platform that helps retail, manufacturing, wholesale, and distribution businesses understand operations, forecast demand, detect anomalies, simulate strategic decisions, and optimize profitability using verified business data.
 
-![MarginPilot AI Platform UI Preview]( MarginPilot AI Dashboard Showcase.png )
+![MarginPilot AI Platform UI Preview]( https://github.com/Prajapatidax/MARGINPILOT-AI/blob/main/MarginPilot%20AI%20Dashboard%20Showcase.png)
 
 ---
-
+    
 ## Key Pillars
 
 - **Real Data Foundation**: Canonical business data schema supporting Retail, Manufacturing, Wholesale, and Distribution without artificial data or mock metrics.
