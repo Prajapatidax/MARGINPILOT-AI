@@ -69,9 +69,10 @@ def register(
         slug = f"{base_slug}-{counter}"
         counter += 1
 
+    biz_str = payload.business_category or payload.business_type or "RETAIL"
     try:
-        biz_type = BusinessType(payload.business_type) if payload.business_type else BusinessType.RETAIL
-    except ValueError:
+        biz_type = BusinessType(biz_str.upper())
+    except (ValueError, KeyError):
         biz_type = BusinessType.RETAIL
 
     try:
@@ -85,7 +86,7 @@ def register(
         name=org_name,
         slug=slug,
         business_type=biz_type,
-        currency=payload.currency or "USD",
+        currency=payload.reporting_currency or payload.currency or "USD",
         timezone=payload.timezone or "UTC",
         country=payload.country or "United States",
         subscription_plan=plan_enum,
@@ -181,6 +182,7 @@ def resend_verification(
     return {"status": "sent", "message": "A new verification code has been dispatched to your email."}
 
 @router.post("/login", response_model=Token)
+@router.post("/token", response_model=Token)
 def login(
     payload: LoginRequest,
     db: Session = Depends(get_db)

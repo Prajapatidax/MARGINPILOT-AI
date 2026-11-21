@@ -26,8 +26,10 @@ class RegisterRequest(BaseModel):
     full_name: str
     organization_name: Optional[str] = None  # Initial organization creation
     business_type: Optional[str] = "RETAIL"
+    business_category: Optional[str] = None
     country: Optional[str] = "United States"
     currency: Optional[str] = "USD"
+    reporting_currency: Optional[str] = None
     timezone: Optional[str] = "UTC"
     subscription_plan: Optional[str] = "GROWTH"
 

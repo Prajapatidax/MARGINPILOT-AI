@@ -83,9 +83,28 @@ def run_all_flow_checks():
     # FLOW 3: Google SMTP Email Verification Flow
     # -------------------------------------------------------------
     print("\n[FLOW 3] Testing Email Verification (OTP Code)...")
+    
+    # 3a. Resend verification while unverified
+    print("  Testing Resend Verification while unverified...")
+    res_resend = client.post("/api/v1/auth/resend-verification", json={"email": test_email})
+    assert res_resend.status_code == 200, f"Resend failed: {res_resend.text}"
+    db.refresh(user)
+    fresh_otp = user.verification_code
+    assert fresh_otp is not None, "New verification code not generated on resend!"
+    print(f"  [PASS] POST /api/v1/auth/resend-verification -> Generated fresh OTP: {fresh_otp}")
+
+    # 3b. Test invalid code rejection
+    res_bad_verify = client.post("/api/v1/auth/verify-email", json={
+        "email": test_email,
+        "code": "000000"
+    })
+    assert res_bad_verify.status_code == 400, "Should reject invalid verification code!"
+    print("  [PASS] Rejected invalid OTP code with 400 Bad Request.")
+
+    # 3c. Verify with valid fresh OTP code
     res_verify = client.post("/api/v1/auth/verify-email", json={
         "email": test_email,
-        "code": otp_code
+        "code": fresh_otp
     })
     assert res_verify.status_code == 200, f"Verify email failed: {res_verify.text}"
     db.refresh(user)
@@ -93,33 +112,25 @@ def run_all_flow_checks():
     assert user.verification_code is None, "verification_code was not cleared!"
     print(f"  [PASS] POST /api/v1/auth/verify-email -> User is_verified: {user.is_verified}")
 
-    # Test Resend Verification Endpoint
-    print("  Testing Resend Verification...")
-    res_resend = client.post("/api/v1/auth/resend-verification", json={"email": test_email})
-    assert res_resend.status_code == 200, f"Resend failed: {res_resend.text}"
-    db.refresh(user)
-    new_otp = user.verification_code
-    assert new_otp is not None, "New verification code not generated on resend!"
-    print(f"  [PASS] POST /api/v1/auth/resend-verification -> Generated new OTP: {new_otp}")
-
-    # Verify with new code
-    res_verify2 = client.post("/api/v1/auth/verify-email", json={"email": test_email, "code": new_otp})
-    assert res_verify2.status_code == 200, "Second verification failed!"
-    print("  [PASS] Successfully re-verified with fresh OTP code.")
+    # 3d. Resend when already verified returns already_verified
+    res_resend_after = client.post("/api/v1/auth/resend-verification", json={"email": test_email})
+    assert res_resend_after.status_code == 200
+    assert res_resend_after.json().get("status") == "already_verified"
+    print("  [PASS] Resend on verified user correctly returns 'already_verified'.")
 
     # -------------------------------------------------------------
     # FLOW 4: Authentication & JWT Login Flow
     # -------------------------------------------------------------
     print("\n[FLOW 4] Testing Login & JWT Token Flow...")
-    login_res = client.post("/api/v1/auth/token", data={
-        "username": test_email,
+    login_res = client.post("/api/v1/auth/login", json={
+        "email": test_email,
         "password": test_password
     })
     assert login_res.status_code == 200, f"Login failed: {login_res.text}"
     tokens = login_res.json()
     access_token = tokens["access_token"]
     assert access_token, "No access token returned!"
-    print(f"  [PASS] POST /api/v1/auth/token -> JWT Token granted: {access_token[:20]}...")
+    print(f"  [PASS] POST /api/v1/auth/login -> JWT Token granted: {access_token[:20]}...")
 
     headers = {"Authorization": f"Bearer {access_token}"}
 
