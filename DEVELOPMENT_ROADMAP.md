@@ -44,16 +44,16 @@ flowchart LR
 
 ---
 
-### Phase 2: Data Ingestion & Intelligent Mapping Engine
-- [ ] Canonical data ingestion pipeline (CSV, XLSX, JSON).
-- [ ] Statistical data profiling (row counts, nulls, cardinality, type inference).
-- [ ] Intelligent column-mapping engine with heuristic and Gemini-assisted matching.
-- [ ] Validation suite (orphan keys, negative quantities, date formats, anomalous prices).
-- [ ] Interactive mapping review and commit UI with idempotent import logs.
+### Phase 2: Data Ingestion & Intelligent Mapping Engine (COMPLETED)
+- [x] Canonical data ingestion pipeline (CSV, XLSX, JSON).
+- [x] Statistical data profiling (row counts, nulls, cardinality, type inference).
+- [x] Intelligent column-mapping engine with heuristic and alias matching.
+- [x] Validation suite (orphan keys, negative quantities, date formats, anomalous prices).
+- [x] Interactive mapping review and commit UI with idempotent import logs.
 
 ---
 
-### Phase 3: Business Intelligence & Analytics Engine
+### Phase 3: Business Intelligence & Analytics Engine (NEXT PHASE)
 - [ ] Core metrics layer (Net Sales, COGS, Gross Profit, Gross Margin, AOV, Turnover).
 - [ ] SQL-aggregated analytical endpoints with date-range filters (7d, 30d, 90d, custom).
 - [ ] Comparative analytics (Period-over-Period, Category breakdown, Segment drill-downs).
