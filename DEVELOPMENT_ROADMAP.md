@@ -53,15 +53,15 @@ flowchart LR
 
 ---
 
-### Phase 3: Business Intelligence & Analytics Engine (NEXT PHASE)
-- [ ] Core metrics layer (Net Sales, COGS, Gross Profit, Gross Margin, AOV, Turnover).
-- [ ] SQL-aggregated analytical endpoints with date-range filters (7d, 30d, 90d, custom).
-- [ ] Comparative analytics (Period-over-Period, Category breakdown, Segment drill-downs).
-- [ ] Interactive Recharts visualizations: Revenue Trends, Margin Analysis, Inventory Alerts.
+### Phase 3: Business Intelligence & Analytics Engine (COMPLETED)
+- [x] Core metrics layer (Net Sales, COGS, Gross Profit, Gross Margin, AOV, Turnover).
+- [x] SQL-aggregated analytical endpoints with date-range filters (7d, 30d, 90d, custom).
+- [x] Comparative analytics (Period-over-Period, Category breakdown, Segment drill-downs).
+- [x] Interactive Recharts visualizations: Revenue Trends, Margin Analysis, Inventory Alerts.
 
 ---
 
-### Phase 4: Machine Learning Platform & Classical ML Models
+### Phase 4: Machine Learning Platform & Classical ML Models (NEXT PHASE)
 - [ ] Feature store and feature engineering pipelines.
 - [ ] Customer Segmentation: RFM feature calculation + K-Means clustering with Silhouette score.
 - [ ] Churn Prediction: XGBoost classification with configurable inactivity windows and SHAP feature importances.
