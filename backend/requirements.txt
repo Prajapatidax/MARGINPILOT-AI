@@ -18,3 +18,17 @@ scikit-learn>=1.5.0
 joblib>=1.4.0
 xgboost>=2.0.0
 scipy>=1.13.0
+
+# Database Driver for Neon Serverless PostgreSQL
+psycopg[binary]>=3.1.18
+
+# Upstash Redis & Caching Drivers
+redis>=5.0.0
+upstash-redis>=1.0.0
+
+# Neon S3-Compatible Bucket Storage
+boto3>=1.34.0
+botocore>=1.34.0
+
+# Generative AI & Gemini API
+google-genai>=0.1.0

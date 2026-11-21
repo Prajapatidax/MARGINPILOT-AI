@@ -15,6 +15,8 @@ from app.services.data_profiler import profile_dataframe, read_file_to_df
 from app.services.column_mapper import generate_column_suggestions
 from app.services.data_validator import validate_dataset
 from app.services.data_importer import commit_import_job
+from app.services.storage_service import storage_service
+from app.services.cache_service import cache_service
 
 router = APIRouter()
 
@@ -89,8 +91,18 @@ async def upload_dataset(
     db.commit()
     db.refresh(job)
 
-    # Store file content in session cache for validation & commit
+    # Store file content in session cache and persist to document storage
     UPLOAD_CACHE[job.id] = content
+    try:
+        storage_meta = storage_service.upload_file(
+            file_bytes=content,
+            filename=file.filename or "data.csv",
+            content_type=file.content_type or "text/csv",
+            folder=f"organizations/{tenant.organization_id}/imports"
+        )
+        cache_service.set(f"import_doc:{job.id}", storage_meta, ex=86400)
+    except Exception as e:
+        print(f"Warning: Storage upload failed: {e}")
 
     return {
         "job_id": job.id,
@@ -146,6 +158,13 @@ def validate_job_mapping(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Import job not found.")
 
     content = UPLOAD_CACHE.get(job_id)
+    if not content:
+        cached_meta = cache_service.get(f"import_doc:{job_id}")
+        if cached_meta and isinstance(cached_meta, dict) and "key" in cached_meta:
+            content = storage_service.download_file(cached_meta["key"])
+            if content:
+                UPLOAD_CACHE[job_id] = content
+
     if not content:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -205,6 +224,13 @@ def commit_dataset(
 
     content = UPLOAD_CACHE.get(job_id)
     if not content:
+        cached_meta = cache_service.get(f"import_doc:{job_id}")
+        if cached_meta and isinstance(cached_meta, dict) and "key" in cached_meta:
+            content = storage_service.download_file(cached_meta["key"])
+            if content:
+                UPLOAD_CACHE[job_id] = content
+
+    if not content:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="File content expired from session. Please re-upload the file."
@@ -223,6 +249,7 @@ def commit_dataset(
 
     # Clean cache
     UPLOAD_CACHE.pop(job_id, None)
+    cache_service.delete(f"import_doc:{job_id}")
 
     return CommitImportResponse(
         status=result["status"],
