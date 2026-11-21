@@ -12,6 +12,8 @@ import {
   XCircle,
 } from "lucide-react";
 import api from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { formatMoney } from "@/lib/currencies";
 
 interface AnomalyItem {
   id: string;
@@ -26,6 +28,7 @@ interface AnomalyItem {
 }
 
 export default function AnomaliesPage() {
+  const { activeOrg } = useAuth();
   const [anomalies, setAnomalies] = useState<AnomalyItem[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -210,7 +213,7 @@ export default function AnomaliesPage() {
                     </td>
 
                     <td className="px-6 py-3.5 font-bold text-slate-900 font-mono text-xs">
-                      ${Number(a.detected_value).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      {formatMoney(Number(a.detected_value), activeOrg?.currency, activeOrg?.country, { minimumFractionDigits: 2 })}
                     </td>
 
                     <td className="px-6 py-3.5 text-xs text-slate-600 max-w-xs">

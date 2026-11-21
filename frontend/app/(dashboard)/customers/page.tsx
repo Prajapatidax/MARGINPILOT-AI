@@ -6,6 +6,7 @@ import { Users, UserCheck, AlertCircle, TrendingUp, ArrowUpRight, ShieldAlert, S
 import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { formatMoney } from "@/lib/currencies";
 
 export default function CustomerIntelligencePage() {
   const { activeOrg } = useAuth();
@@ -153,7 +154,7 @@ export default function CustomerIntelligencePage() {
                         </span>
                       </td>
                       <td className="py-3 px-3 font-semibold text-slate-900">
-                        ${cust.clv_estimate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {formatMoney(cust.clv_estimate, activeOrg?.currency, activeOrg?.country, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-2">

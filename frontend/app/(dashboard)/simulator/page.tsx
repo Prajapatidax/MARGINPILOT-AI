@@ -23,6 +23,8 @@ import {
   Tooltip,
 } from "recharts";
 import api from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { getCurrencySymbol, formatMoney } from "@/lib/currencies";
 
 interface SimulationResult {
   scenario_type: string;
@@ -40,11 +42,20 @@ interface SimulationResult {
 }
 
 export default function SimulatorPage() {
+  const { activeOrg } = useAuth();
   const [activeTab, setActiveTab] = useState<string>("Pricing");
   const [priceReduction, setPriceReduction] = useState<number>(10);
   const [elasticity, setElasticity] = useState<number>(1.6);
   const [simulation, setSimulation] = useState<SimulationResult | null>(null);
   const [isRunning, setIsRunning] = useState<boolean>(false);
+
+  const currCode = activeOrg?.currency || "USD";
+  const currCountry = activeOrg?.country;
+  const currencySymbol = getCurrencySymbol(currCode, currCountry);
+  const fmt = (
+    val: number,
+    options?: { compact?: boolean; minimumFractionDigits?: number; maximumFractionDigits?: number }
+  ) => formatMoney(val, currCode, currCountry, options);
 
   const runSimulation = async (pct?: number, tab?: string) => {
     setIsRunning(true);
@@ -168,7 +179,7 @@ export default function SimulatorPage() {
                   : "0.0%"}
               </div>
               <div className="text-xs text-slate-400 mt-1">
-                ${(simulation?.simulated_revenue || 0).toLocaleString()} projected
+                {fmt(simulation?.simulated_revenue || 0, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} projected
               </div>
             </div>
 
@@ -180,7 +191,7 @@ export default function SimulatorPage() {
                   : "0.0%"}
               </div>
               <div className="text-xs text-slate-400 mt-1">
-                ${(simulation?.simulated_profit || 0).toLocaleString()} projected
+                {fmt(simulation?.simulated_profit || 0, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} projected
               </div>
             </div>
 
@@ -218,8 +229,10 @@ export default function SimulatorPage() {
                     tickLine={false}
                     axisLine={false}
                     tick={{ fontSize: 11, fill: "#64748b" }}
+                    tickFormatter={(val) => fmt(val, { compact: true })}
                   />
                   <Tooltip
+                    formatter={(val: number) => [fmt(val), ""]}
                     contentStyle={{
                       backgroundColor: "#ffffff",
                       borderColor: "#e2e8f0",
@@ -233,7 +246,7 @@ export default function SimulatorPage() {
                     stroke="#2563eb"
                     strokeWidth={2.5}
                     dot={{ r: 3 }}
-                    name="Revenue ($)"
+                    name={`Revenue (${currencySymbol})`}
                   />
                   <Line
                     type="monotone"
@@ -241,7 +254,7 @@ export default function SimulatorPage() {
                     stroke="#10b981"
                     strokeWidth={2.5}
                     dot={{ r: 3 }}
-                    name="Profit ($)"
+                    name={`Profit (${currencySymbol})`}
                   />
                 </LineChart>
               </ResponsiveContainer>

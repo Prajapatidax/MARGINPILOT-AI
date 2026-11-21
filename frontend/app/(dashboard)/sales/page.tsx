@@ -33,6 +33,7 @@ import {
 } from "recharts";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { getCurrencySymbol, formatMoney } from "@/lib/currencies";
 
 export default function SalesIntelligencePage() {
   const { activeOrg } = useAuth();
@@ -66,6 +67,14 @@ export default function SalesIntelligencePage() {
   const displayTrends = data?.sales_trend || [];
   const displayCategories = data?.sales_by_category || [];
   const displayProfitability = data?.profitability_trend || [];
+
+  const currCode = activeOrg?.currency || "USD";
+  const currCountry = activeOrg?.country;
+  const currencySymbol = getCurrencySymbol(currCode, currCountry);
+  const fmt = (
+    val: number,
+    options?: { compact?: boolean; minimumFractionDigits?: number; maximumFractionDigits?: number }
+  ) => formatMoney(val, currCode, currCountry, options);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -101,7 +110,7 @@ export default function SalesIntelligencePage() {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Sales</span>
           <div className="text-2xl font-bold text-slate-900 mt-2">
-            ${totalSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {fmt(totalSales, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="flex items-center gap-1 mt-1 text-xs font-semibold text-emerald-600">
             {salesGrowth !== 0 ? (
@@ -131,7 +140,7 @@ export default function SalesIntelligencePage() {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Average Order Value (AOV)</span>
           <div className="text-2xl font-bold text-slate-900 mt-2">
-            ${aov.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {fmt(aov, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <div className="text-xs text-slate-400 mt-1">Across {totalOrders} total orders</div>
         </div>
@@ -142,7 +151,7 @@ export default function SalesIntelligencePage() {
             {grossMargin.toFixed(1)}%
           </div>
           <div className="text-xs text-emerald-600 font-semibold mt-1">
-            Gross Profit: ${grossProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            Gross Profit: {fmt(grossProfit, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
       </div>
@@ -178,10 +187,10 @@ export default function SalesIntelligencePage() {
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(0) + "k" : val}`}
+                  tickFormatter={(val) => fmt(val, { compact: true })}
                 />
                 <Tooltip
-                  formatter={(val: number) => [`$${val.toLocaleString()}`, "Sales"]}
+                  formatter={(val: number) => [fmt(val), "Sales"]}
                   contentStyle={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0", borderRadius: 8, fontSize: 12 }}
                 />
                 <Area
@@ -288,10 +297,10 @@ export default function SalesIntelligencePage() {
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(0) + "k" : val}`}
+                    tickFormatter={(val) => fmt(val, { compact: true })}
                   />
                   <Tooltip
-                    formatter={(val: number) => [`$${val.toLocaleString()}`, ""]}
+                    formatter={(val: number) => [fmt(val), ""]}
                     contentStyle={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0", borderRadius: 8, fontSize: 12 }}
                   />
                   <Legend wrapperStyle={{ fontSize: 11 }} />

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Boxes, AlertTriangle, ShieldCheck, RefreshCw, ArrowRight, CheckCircle2, Inbox } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { formatMoney } from "@/lib/currencies";
 
 export default function InventoryIntelligencePage() {
   const { activeOrg } = useAuth();
@@ -49,7 +50,7 @@ export default function InventoryIntelligencePage() {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Inventory Valuation</span>
           <div className="text-2xl font-bold text-blue-600 mt-2">
-            ${totalValuation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {formatMoney(totalValuation, activeOrg?.currency, activeOrg?.country, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <span className="text-xs text-slate-400 mt-1 block">At standard cost price</span>
         </div>

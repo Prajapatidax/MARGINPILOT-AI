@@ -161,6 +161,47 @@ export function findCountryCurrency(currencyCode?: string, countryName?: string)
   return COUNTRIES[0]; // fallback USD
 }
 
+export function getCurrencySymbol(currencyCode?: string, countryName?: string): string {
+  const item = findCountryCurrency(currencyCode, countryName);
+  return item.symbol.trim();
+}
+
+export function formatMoney(
+  amount: number,
+  currencyCode?: string,
+  countryName?: string,
+  options?: { minimumFractionDigits?: number; maximumFractionDigits?: number; compact?: boolean }
+): string {
+  const item = findCountryCurrency(currencyCode, countryName);
+  const symbol = item.symbol;
+  const isPrefix = item.symbolPlacement === "prefix";
+
+  if (options?.compact && Math.abs(amount) >= 1000) {
+    let formatted = "";
+    if (Math.abs(amount) >= 10000000 && item.code === "INR") {
+      formatted = (amount / 10000000).toFixed(1).replace(/\.0$/, "") + "Cr";
+    } else if (Math.abs(amount) >= 100000 && item.code === "INR") {
+      formatted = (amount / 100000).toFixed(1).replace(/\.0$/, "") + "L";
+    } else if (Math.abs(amount) >= 1000000) {
+      formatted = (amount / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+    } else {
+      formatted = (amount / 1000).toFixed(0) + "k";
+    }
+    return isPrefix ? `${symbol}${formatted}` : `${formatted} ${symbol}`;
+  }
+
+  const minDec = options?.minimumFractionDigits !== undefined ? options.minimumFractionDigits : 2;
+  const maxDec = options?.maximumFractionDigits !== undefined ? options.maximumFractionDigits : 2;
+
+  const locale = item.code === "INR" ? "en-IN" : "en-US";
+  const numStr = Number(amount || 0).toLocaleString(locale, {
+    minimumFractionDigits: minDec,
+    maximumFractionDigits: maxDec,
+  });
+
+  return isPrefix ? `${symbol}${numStr}` : `${numStr} ${symbol}`;
+}
+
 export function formatPlanPrice(
   usdPrice: number,
   currencyCode?: string,
@@ -172,7 +213,8 @@ export function formatPlanPrice(
   }
   const raw = usdPrice * item.exchangeRate;
   const rounded = Math.round(raw / item.roundTo) * item.roundTo;
-  const formattedNum = rounded.toLocaleString();
+  const locale = item.code === "INR" ? "en-IN" : "en-US";
+  const formattedNum = rounded.toLocaleString(locale);
   return item.symbolPlacement === "prefix"
     ? `${item.symbol}${formattedNum}`
     : `${formattedNum} ${item.symbol}`;

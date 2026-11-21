@@ -32,6 +32,7 @@ import {
 } from "recharts";
 import { useAuth } from "@/lib/auth-context";
 import { apiClient } from "@/lib/api";
+import { getCurrencySymbol, formatMoney } from "@/lib/currencies";
 
 interface SummaryData {
   has_data: boolean;
@@ -95,6 +96,14 @@ export default function DashboardOverview() {
   const inventoryAlerts = data?.inventory_alerts || [];
   const aiRecommendations = data?.ai_recommendations || [];
 
+  const currCode = activeOrg?.currency || "USD";
+  const currCountry = activeOrg?.country;
+  const currencySymbol = getCurrencySymbol(currCode, currCountry);
+  const fmt = (
+    val: number,
+    options?: { compact?: boolean; minimumFractionDigits?: number; maximumFractionDigits?: number }
+  ) => formatMoney(val, currCode, currCountry, options);
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Header */}
@@ -149,13 +158,13 @@ export default function DashboardOverview() {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Revenue</span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <DollarSign className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
+              {currencySymbol}
             </div>
           </div>
           <div className="mt-3">
             <div className="text-2xl font-bold text-slate-900">
-              ${metrics.total_revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {fmt(metrics.total_revenue, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             {hasData && metrics.revenue_change_pct !== 0 ? (
               <div className="flex items-center gap-1 mt-1 text-xs font-medium text-emerald-600">
@@ -180,7 +189,7 @@ export default function DashboardOverview() {
           </div>
           <div className="mt-3">
             <div className="text-2xl font-bold text-slate-900">
-              ${metrics.gross_profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {fmt(metrics.gross_profit, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             {hasData && metrics.gross_profit_change_pct !== 0 ? (
               <div className="flex items-center gap-1 mt-1 text-xs font-medium text-emerald-600">
@@ -280,10 +289,10 @@ export default function DashboardOverview() {
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={(val) => `$${val >= 1000 ? (val / 1000).toFixed(0) + "k" : val}`}
+                    tickFormatter={(val) => fmt(val, { compact: true })}
                   />
                   <Tooltip
-                    formatter={(val: number) => [`$${val.toLocaleString()}`, ""]}
+                    formatter={(val: number) => [fmt(val), ""]}
                     contentStyle={{ backgroundColor: "#ffffff", borderColor: "#e2e8f0", borderRadius: 8, fontSize: 12 }}
                   />
                   <Line
@@ -389,7 +398,7 @@ export default function DashboardOverview() {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between text-xs mb-1">
                       <span className="font-medium text-slate-800 truncate">{prod.name}</span>
-                      <span className="text-slate-500 font-semibold">${prod.revenue.toLocaleString()}</span>
+                      <span className="text-slate-500 font-semibold">{fmt(prod.revenue, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                     </div>
                     <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                       <div

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { DollarSign, Percent, TrendingUp, Info, ShieldCheck, FileSpreadsheet, Inbox } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { formatMoney } from "@/lib/currencies";
 
 export default function FinancialIntelligencePage() {
   const { activeOrg } = useAuth();
@@ -73,7 +74,7 @@ export default function FinancialIntelligencePage() {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Net Sales</span>
           <div className="text-2xl font-bold text-slate-900 mt-2">
-            ${summary.net_sales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {formatMoney(summary.net_sales, activeOrg?.currency, activeOrg?.country, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <span className="text-xs text-slate-400 mt-1 block">
             {hasData ? "Gross sales minus discounts" : "Awaiting sales transactions"}
@@ -83,7 +84,7 @@ export default function FinancialIntelligencePage() {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Cost of Goods Sold (COGS)</span>
           <div className="text-2xl font-bold text-slate-900 mt-2">
-            ${summary.cost_of_goods_sold.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {formatMoney(summary.cost_of_goods_sold, activeOrg?.currency, activeOrg?.country, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <span className="text-xs text-slate-400 mt-1 block">
             {hasData ? "Direct product procurement costs" : "Awaiting cost data"}
@@ -93,7 +94,7 @@ export default function FinancialIntelligencePage() {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">Gross Profit</span>
           <div className="text-2xl font-bold text-emerald-600 mt-2">
-            ${summary.gross_profit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {formatMoney(summary.gross_profit, activeOrg?.currency, activeOrg?.country, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           <span className="text-xs text-slate-400 mt-1 block">
             {hasData ? "Available for operational expenses" : "Awaiting data"}
