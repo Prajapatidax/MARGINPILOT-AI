@@ -16,62 +16,14 @@ import {
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
+import MarketingNavbar from "@/components/layout/MarketingNavbar";
+import MarketingFooter from "@/components/layout/MarketingFooter";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-blue-600 selection:text-white flex flex-col">
       {/* Navigation */}
-      <header className="h-20 border-b border-slate-100 sticky top-0 bg-white/95 backdrop-blur-sm z-40">
-        <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
-          {/* Brand */}
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-              M
-            </div>
-            <div className="flex items-center">
-              <span className="font-extrabold text-xl text-slate-900 tracking-tight">MarginPilot</span>
-              <span className="text-blue-600 font-bold text-xs ml-1.5 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                AI
-              </span>
-            </div>
-          </Link>
-
-          {/* Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <Link href="/" className="text-blue-600 font-semibold">
-              Home
-            </Link>
-            <Link href="#features" className="hover:text-slate-900 transition-colors">
-              Features
-            </Link>
-            <Link href="#industries" className="hover:text-slate-900 transition-colors">
-              Industries
-            </Link>
-            <Link href="#pricing" className="hover:text-slate-900 transition-colors">
-              Pricing
-            </Link>
-            <Link href="/docs" className="hover:text-slate-900 transition-colors">
-              Docs
-            </Link>
-          </nav>
-
-          {/* Auth Actions */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all hover:shadow"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </header>
+      <MarketingNavbar />
 
       {/* Hero Section */}
       <section className="pt-16 pb-20 px-6 max-w-7xl mx-auto">
@@ -99,7 +51,7 @@ export default function LandingPage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                href="#demo"
+                href="/demo"
                 className="px-6 py-3.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl transition-colors flex items-center gap-2"
               >
                 <Play className="w-4 h-4 text-slate-400 fill-slate-400" />
@@ -297,6 +249,9 @@ export default function LandingPage() {
           </Link>
         </div>
       </section>
+
+      {/* Marketing Footer */}
+      <MarketingFooter />
     </div>
   );
 }

@@ -8,13 +8,24 @@ from app.db.base import Base
 import app.models  # Ensure all models are registered
 from app.api.v1.router import api_router
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Ensure all tables exist in database on startup
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("Database tables verified and initialized successfully.")
+    except Exception as e:
+        print(f"Warning: Database initialization notice: {e}")
+    yield
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="Enterprise AI Business Intelligence & Decision Automation Platform API",
     version="1.0.0",
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url=f"{settings.API_V1_STR}/docs",
-    redoc_url=f"{settings.API_V1_STR}/redoc"
+    redoc_url=f"{settings.API_V1_STR}/redoc",
+    lifespan=lifespan
 )
 
 # CORS Middleware with strict origin allowlist
