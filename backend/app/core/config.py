@@ -21,6 +21,8 @@ class Settings(BaseSettings):
 
     @property
     def sqlalchemy_database_url(self) -> str:
+        if os.environ.get("TESTING") == "true":
+            return "sqlite:///:memory:"
         url = self.DATABASE_URL
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql+psycopg://", 1)

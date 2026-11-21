@@ -1,3 +1,4 @@
+import os
 import json
 from typing import Optional, Any
 from app.core.config import settings
@@ -11,6 +12,9 @@ class CacheService:
         self.client = None
         self.mode = "memory"
         self._memory_cache = {}
+
+        if os.environ.get("TESTING") == "true":
+            return
 
         # 1. Check for Upstash REST credentials
         if settings.UPSTASH_REDIS_REST_URL and settings.UPSTASH_REDIS_REST_TOKEN:

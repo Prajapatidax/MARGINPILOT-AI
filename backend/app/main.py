@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +11,11 @@ from app.api.v1.router import api_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Skip remote DB auto-sync during test suites
+    if os.environ.get("TESTING") == "true":
+        yield
+        return
+
     # Ensure all tables exist in database on startup
     try:
         Base.metadata.create_all(bind=engine)
@@ -25,7 +31,7 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url=f"{settings.API_V1_STR}/docs",
     redoc_url=f"{settings.API_V1_STR}/redoc",
-    lifespan=lifespan
+    lifespan=None if os.environ.get("TESTING") == "true" else lifespan
 )
 
 # CORS Middleware with strict origin allowlist

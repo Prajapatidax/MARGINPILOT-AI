@@ -15,6 +15,11 @@ class NeonStorageService:
         self.bucket = settings.NEON_STORAGE_BUCKET or "marginpilot-docs"
         self.local_dir = Path("./storage_uploads")
 
+        if os.environ.get("TESTING") == "true":
+            self.mode = "local"
+            self.local_dir.mkdir(parents=True, exist_ok=True)
+            return
+
         if settings.NEON_STORAGE_ENDPOINT and settings.NEON_STORAGE_ACCESS_KEY and settings.NEON_STORAGE_SECRET_KEY:
             try:
                 import boto3

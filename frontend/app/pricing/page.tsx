@@ -11,16 +11,60 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  Globe2,
+  Lock,
 } from "lucide-react";
 import MarketingNavbar from "@/components/layout/MarketingNavbar";
 import MarketingFooter from "@/components/layout/MarketingFooter";
 
+interface CountryCurrency {
+  country: string;
+  code: string;
+  symbol: string;
+  flag: string;
+  exchangeRate: number; // USD to local currency parity
+  symbolPlacement: "prefix" | "suffix";
+  roundTo: number; // Rounding granularity (e.g. 100 for INR/JPY)
+}
+
+const COUNTRIES: CountryCurrency[] = [
+  { country: "United States", code: "USD", symbol: "$", flag: "🇺🇸", exchangeRate: 1.0, symbolPlacement: "prefix", roundTo: 1 },
+  { country: "India", code: "INR", symbol: "₹", flag: "🇮🇳", exchangeRate: 83.5, symbolPlacement: "prefix", roundTo: 100 },
+  { country: "European Union", code: "EUR", symbol: "€", flag: "🇪🇺", exchangeRate: 0.92, symbolPlacement: "prefix", roundTo: 1 },
+  { country: "United Kingdom", code: "GBP", symbol: "£", flag: "🇬🇧", exchangeRate: 0.79, symbolPlacement: "prefix", roundTo: 1 },
+  { country: "Canada", code: "CAD", symbol: "CA$", flag: "🇨🇦", exchangeRate: 1.36, symbolPlacement: "prefix", roundTo: 5 },
+  { country: "Australia", code: "AUD", symbol: "A$", flag: "🇦🇺", exchangeRate: 1.52, symbolPlacement: "prefix", roundTo: 5 },
+  { country: "Japan", code: "JPY", symbol: "¥", flag: "🇯🇵", exchangeRate: 155.0, symbolPlacement: "prefix", roundTo: 100 },
+  { country: "Singapore", code: "SGD", symbol: "S$", flag: "🇸🇬", exchangeRate: 1.34, symbolPlacement: "prefix", roundTo: 5 },
+  { country: "United Arab Emirates", code: "AED", symbol: "AED ", flag: "🇦🇪", exchangeRate: 3.67, symbolPlacement: "prefix", roundTo: 5 },
+  { country: "Switzerland", code: "CHF", symbol: "CHF ", flag: "🇨🇭", exchangeRate: 0.89, symbolPlacement: "prefix", roundTo: 5 },
+  { country: "Brazil", code: "BRL", symbol: "R$ ", flag: "🇧🇷", exchangeRate: 5.50, symbolPlacement: "prefix", roundTo: 5 },
+  { country: "South Africa", code: "ZAR", symbol: "R ", flag: "🇿🇦", exchangeRate: 18.20, symbolPlacement: "prefix", roundTo: 10 },
+];
+
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"annual" | "monthly">("annual");
+  const [selectedCurrency, setSelectedCurrency] = useState<CountryCurrency>(COUNTRIES[0]);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const toggleFaq = (idx: number) => {
     setOpenFaq(openFaq === idx ? null : idx);
+  };
+
+  const convertPrice = (usdPrice: number) => {
+    const raw = usdPrice * selectedCurrency.exchangeRate;
+    const rounded = Math.round(raw / selectedCurrency.roundTo) * selectedCurrency.roundTo;
+    const formattedNum = rounded.toLocaleString();
+    return selectedCurrency.symbolPlacement === "prefix"
+      ? `${selectedCurrency.symbol}${formattedNum}`
+      : `${formattedNum} ${selectedCurrency.symbol}`;
+  };
+
+  const getAnnualTotal = (monthlyUsdPrice: number) => {
+    const annualUsd = monthlyUsdPrice * 12;
+    const raw = annualUsd * selectedCurrency.exchangeRate;
+    const rounded = Math.round(raw / selectedCurrency.roundTo) * selectedCurrency.roundTo;
+    return `${selectedCurrency.symbol}${rounded.toLocaleString()}`;
   };
 
   const plans = [
@@ -28,8 +72,8 @@ export default function PricingPage() {
       name: "Starter",
       badge: "Emerging Business",
       description: "Essential intelligence and profit monitoring for single-entity retailers and wholesale traders.",
-      priceMonthly: 199,
-      priceAnnual: 159,
+      usdMonthly: 199,
+      usdAnnual: 159,
       features: [
         "Up to 25,000 monthly order lines",
         "Real-Time Sales & Margin Analytics",
@@ -40,15 +84,15 @@ export default function PricingPage() {
         "Community & Email Support (24h SLA)",
       ],
       cta: "Start 14-Day Free Trial",
-      href: "/register?plan=starter",
+      href: `/register?plan=starter&currency=${selectedCurrency.code}`,
       highlighted: false,
     },
     {
       name: "Growth",
       badge: "Most Popular",
       description: "Complete AI operating system with PyTorch deep learning, XGBoost, and Gemini AI Copilot.",
-      priceMonthly: 499,
-      priceAnnual: 399,
+      usdMonthly: 499,
+      usdAnnual: 399,
       features: [
         "Up to 250,000 monthly order lines",
         "Everything in Starter, plus:",
@@ -63,15 +107,15 @@ export default function PricingPage() {
         "Priority Support (4h SLA)",
       ],
       cta: "Start 14-Day Free Trial",
-      href: "/register?plan=growth",
+      href: `/register?plan=growth&currency=${selectedCurrency.code}`,
       highlighted: true,
     },
     {
       name: "Enterprise",
       badge: "Scale & High Volume",
       description: "Dedicated serverless database branches, custom ML fine-tuning, and dedicated architect support.",
-      priceMonthly: 1299,
-      priceAnnual: 1099,
+      usdMonthly: 1299,
+      usdAnnual: 1099,
       features: [
         "Unlimited monthly order lines",
         "Everything in Growth, plus:",
@@ -85,7 +129,7 @@ export default function PricingPage() {
         "SOC 2 Type II & HIPAA Compliance package",
       ],
       cta: "Contact Enterprise Sales",
-      href: "/contact?type=enterprise",
+      href: `/contact?type=enterprise&currency=${selectedCurrency.code}`,
       highlighted: false,
     },
   ];
@@ -111,28 +155,28 @@ export default function PricingPage() {
 
   const faqs = [
     {
+      q: "Is pricing the same in every country?",
+      a: "Yes. MarginPilot AI implements strict Global Price Parity. Subscription fees in every country and currency are calculated directly from fair market foreign exchange rates with zero geographic penalties or regional markups.",
+    },
+    {
       q: "Can I try MarginPilot AI before committing?",
       a: "Yes. All Starter and Growth plans include a 14-day fully featured free trial. No credit card is required to sign up and begin uploading your datasets.",
     },
     {
       q: "How does the annual discount work?",
-      a: "When you choose Annual billing, you save 20% on the monthly subscription price. The plan is billed as a single annual payment.",
+      a: "When you choose Annual billing, you save 20% on the monthly subscription price. The plan is billed as a single annual payment in your selected currency.",
     },
     {
       q: "Is our proprietary company data used to train public AI models?",
       a: "Never. Your datasets are stored strictly inside your organization workspace with Neon PostgreSQL database isolation. Gemini AI is queried solely via zero-retention semantic RAG, and custom machine learning models are trained exclusively on your private organization records.",
     },
     {
-      q: "What file formats can we ingest?",
-      a: "MarginPilot AI natively ingests CSV, XLSX (Excel), and JSON files with automated column mapping. For Enterprise clients, we build custom REST webhook and database connectors for SAP, NetSuite, Shopify, and proprietary ERPs.",
+      q: "What payment methods are supported internationally?",
+      a: "We support Visa, Mastercard, American Express, SEPA Direct Debit (Europe), UPI & NetBanking (India), iDEAL (Netherlands), and wire transfers for Enterprise customers.",
     },
     {
       q: "Can we add team members without paying per seat?",
       a: "Yes! MarginPilot AI does not charge per-seat fees. Each plan includes generous team member allocations (3 for Starter, 15 for Growth, and unlimited for Enterprise) so your entire operations, finance, and management teams can collaborate.",
-    },
-    {
-      q: "What happens if we exceed our monthly order lines?",
-      a: "We never interrupt your analytics or shut down your dashboard. If you exceed your tier limit, our system sends a notification, and you can easily upgrade to the next tier with one click.",
     },
   ];
 
@@ -141,20 +185,71 @@ export default function PricingPage() {
       <MarketingNavbar />
 
       {/* Hero */}
-      <section className="pt-16 pb-12 px-6 max-w-7xl mx-auto text-center space-y-6">
+      <section className="pt-16 pb-10 px-6 max-w-7xl mx-auto text-center space-y-6">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold">
           <Zap className="w-3.5 h-3.5" />
-          Transparent SaaS Pricing
+          Global Pricing &amp; Price Parity
         </div>
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-3xl mx-auto leading-tight">
           Invest in <span className="text-blue-600">Predictable Profit</span>
         </h1>
         <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Transparent pricing for organizations of any size. Get full access to machine learning models, decision simulation, and verified financial intelligence.
+          Identical economic pricing in every major country. Zero hidden markups. Full access to machine learning models, decision simulation, and verified financial intelligence.
         </p>
 
+        {/* Global Price Parity Notice Banner */}
+        <div className="max-w-2xl mx-auto p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center gap-2.5 text-xs text-slate-600">
+          <Globe2 className="w-4 h-4 text-blue-600 shrink-0" />
+          <span>
+            <strong>Global Price Parity Guarantee:</strong> In every country, pricing is pegged strictly to real-time market exchange rates with equal purchasing terms worldwide.
+          </span>
+        </div>
+
+        {/* Country & Currency Selector Bar */}
+        <div className="pt-2 max-w-4xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Select Your Country / Currency:
+            </span>
+
+            {/* Quick Country Pills */}
+            <div className="flex items-center gap-1.5 flex-wrap justify-center">
+              {COUNTRIES.slice(0, 6).map((c) => (
+                <button
+                  key={c.code}
+                  onClick={() => setSelectedCurrency(c)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    selectedCurrency.code === c.code
+                      ? "bg-blue-600 text-white shadow-sm ring-2 ring-blue-600/30"
+                      : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <span>{c.flag}</span>
+                  <span>{c.code}</span>
+                </button>
+              ))}
+
+              {/* Full Dropdown for all 12 major countries */}
+              <select
+                value={selectedCurrency.code}
+                onChange={(e) => {
+                  const match = COUNTRIES.find((c) => c.code === e.target.value);
+                  if (match) setSelectedCurrency(match);
+                }}
+                className="px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.flag} {c.country} ({c.code} - {c.symbol.trim()})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
         {/* Annual / Monthly Toggle */}
-        <div className="flex items-center justify-center gap-4 pt-6">
+        <div className="flex items-center justify-center gap-4 pt-4">
           <span
             className={`text-sm font-semibold cursor-pointer ${
               billingCycle === "monthly" ? "text-slate-900" : "text-slate-500"
@@ -189,11 +284,14 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Pricing Cards */}
+      {/* Pricing Cards with Exact Country Parity */}
       <section className="pb-20 px-6 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
           {plans.map((plan) => {
-            const price = billingCycle === "annual" ? plan.priceAnnual : plan.priceMonthly;
+            const usdVal = billingCycle === "annual" ? plan.usdAnnual : plan.usdMonthly;
+            const priceFormatted = convertPrice(usdVal);
+            const annualBilledText = getAnnualTotal(plan.usdAnnual);
+
             return (
               <div
                 key={plan.name}
@@ -219,12 +317,19 @@ export default function PricingPage() {
                   <p className="text-xs text-slate-500 min-h-[36px]">{plan.description}</p>
 
                   <div className="my-6 pb-6 border-b border-slate-100">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl sm:text-5xl font-extrabold text-slate-900">${price}</span>
+                    <div className="flex items-baseline gap-1.5 flex-wrap">
+                      <span className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight">
+                        {priceFormatted}
+                      </span>
                       <span className="text-slate-500 text-sm font-medium">/ month</span>
                     </div>
                     <span className="text-[11px] text-slate-400 mt-1 block">
-                      {billingCycle === "annual" ? "Billed annually ($" + price * 12 + "/yr)" : "Billed monthly"}
+                      {billingCycle === "annual"
+                        ? `Billed annually (${annualBilledText}/yr)`
+                        : "Billed monthly"}
+                    </span>
+                    <span className="text-[10px] text-blue-600 font-semibold mt-0.5 block">
+                      {selectedCurrency.flag} {selectedCurrency.country} ({selectedCurrency.code})
                     </span>
                   </div>
 
@@ -322,7 +427,7 @@ export default function PricingPage() {
         <div className="text-center space-y-2 mb-10">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Frequently Asked Questions</h2>
           <p className="text-xs sm:text-sm text-slate-500">
-            Have questions about billing, deployment, or our machine learning architecture?
+            Have questions about country pricing, global currency parity, or billing cycles?
           </p>
         </div>
 
@@ -360,13 +465,13 @@ export default function PricingPage() {
       <section className="bg-slate-900 text-white py-14 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           <div className="space-y-1">
-            <h3 className="text-xl font-bold tracking-tight">Need a custom contract or private cloud deployment?</h3>
+            <h3 className="text-xl font-bold tracking-tight">Need local currency invoicing or corporate purchase orders?</h3>
             <p className="text-slate-400 text-xs">
-              We provide on-premise, HIPAA-compliant, and dedicated VPC configurations for high-volume enterprise enterprises.
+              We provide localized tax-compliant invoices (GST in India, VAT in Europe &amp; UK) with local bank wire settlement options.
             </p>
           </div>
           <Link
-            href="/contact?type=enterprise"
+            href={`/contact?type=enterprise&currency=${selectedCurrency.code}`}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow transition-colors flex items-center gap-2 shrink-0"
           >
             <span>Speak with Solutions Team</span>

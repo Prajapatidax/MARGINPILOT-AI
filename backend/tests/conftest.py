@@ -1,3 +1,6 @@
+import os
+os.environ["TESTING"] = "true"
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -37,6 +40,6 @@ def client(db_session):
             pass
 
     app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as test_client:
-        yield test_client
+    test_client = TestClient(app, raise_server_exceptions=True)
+    yield test_client
     app.dependency_overrides.clear()
