@@ -46,9 +46,21 @@ app.add_middleware(
 # Mount API V1 routes
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+@app.get("/", status_code=status.HTTP_200_OK, tags=["System Health"])
+def root():
+    """Root platform metadata and service discovery endpoint."""
+    return {
+        "service": settings.PROJECT_NAME,
+        "version": "1.0.0",
+        "status": "operational",
+        "documentation": f"{settings.API_V1_STR}/docs",
+        "health_check": f"{settings.API_V1_STR}/health"
+    }
+
 @app.get("/health", status_code=status.HTTP_200_OK, tags=["System Health"])
+@app.get(f"{settings.API_V1_STR}/health", status_code=status.HTTP_200_OK, tags=["System Health"])
 def health_check():
-    """Liveness check for deployment orchestrators (Render, Vercel)."""
+    """Liveness check for deployment orchestrators (Render, Vercel) and frontend probes."""
     return {
         "status": "ok",
         "service": settings.PROJECT_NAME,
@@ -56,6 +68,7 @@ def health_check():
     }
 
 @app.get("/ready", status_code=status.HTTP_200_OK, tags=["System Health"])
+@app.get(f"{settings.API_V1_STR}/ready", status_code=status.HTTP_200_OK, tags=["System Health"])
 def readiness_check():
     """Readiness probe checking database connectivity."""
     try:
