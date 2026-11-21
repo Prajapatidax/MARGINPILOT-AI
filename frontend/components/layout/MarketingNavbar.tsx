@@ -13,7 +13,7 @@ export default function MarketingNavbar() {
     { label: "Features", href: "/features" },
     { label: "Industries", href: "/industries" },
     { label: "Pricing", href: "/pricing" },
-    { label: "Docs", href: "/docs" },
+    { label: "Status", href: "/status" },
     { label: "Watch Demo", href: "/demo", isSpecial: true },
   ];
 

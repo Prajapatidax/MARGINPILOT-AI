@@ -25,10 +25,10 @@ export default function MarketingFooter() {
             <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
               The Enterprise AI Business Intelligence &amp; Decision Automation Operating System. Built with verified Neon PostgreSQL, Upstash Redis caching, real ML models, and secure organization data isolation.
             </p>
-            <div className="flex items-center gap-2 text-xs text-emerald-600 font-medium">
+            <Link href="/status" className="flex items-center gap-2 text-xs text-emerald-600 font-medium hover:text-emerald-700 transition-colors">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>All Systems Operational (99.99% Uptime)</span>
-            </div>
+            </Link>
           </div>
 
           {/* Column 2: Product */}
@@ -96,8 +96,9 @@ export default function MarketingFooter() {
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Trust &amp; Legal</h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/docs" className="hover:text-blue-600 transition-colors">
-                  Documentation
+                <Link href="/status" className="hover:text-blue-600 transition-colors flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span>System Status</span>
                 </Link>
               </li>
               <li>

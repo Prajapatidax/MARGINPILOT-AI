@@ -20,6 +20,7 @@ import {
   Settings,
   HelpCircle,
   ShieldCheck,
+  Activity,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -114,11 +115,11 @@ export const Sidebar: React.FC = () => {
           <span>Settings</span>
         </Link>
         <Link
-          href="/docs"
+          href="/status"
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
         >
-          <HelpCircle className="w-4 h-4 text-slate-400" />
-          <span>Documentation</span>
+          <Activity className="w-4 h-4 text-emerald-500" />
+          <span>System Status</span>
         </Link>
       </div>
     </aside>
