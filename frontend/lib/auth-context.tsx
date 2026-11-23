@@ -50,6 +50,8 @@ interface AuthContextType {
   register: (payloadOrEmail: RegisterPayload | string, password?: string, fullName?: string, orgName?: string, bizType?: string) => Promise<{ requiresVerification?: boolean }>;
   verifyEmail: (email: string, code: string) => Promise<{ status: string; message: string }>;
   resendVerification: (email: string) => Promise<{ status: string; message: string }>;
+  forgotPassword: (email: string) => Promise<{ status: string; message: string }>;
+  resetPassword: (payload: { email: string; token: string; new_password: string }) => Promise<{ status: string; message: string }>;
   switchOrg: (orgId: string) => Promise<void>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
@@ -166,6 +168,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return res;
   };
 
+  const forgotPassword = async (email: string) => {
+    const res = await apiClient<{ status: string; message: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+    return res;
+  };
+
+  const resetPassword = async (payload: { email: string; token: string; new_password: string }) => {
+    const res = await apiClient<{ status: string; message: string }>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return res;
+  };
+
   const switchOrg = async (orgId: string) => {
     const res = await apiClient<{ access_token: string; active_organization_id: string; role: string }>("/auth/switch-org", {
       method: "POST",
@@ -195,6 +213,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         verifyEmail,
         resendVerification,
+        forgotPassword,
+        resetPassword,
         switchOrg,
         logout,
         refreshProfile,

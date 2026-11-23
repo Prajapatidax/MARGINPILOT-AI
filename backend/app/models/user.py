@@ -18,6 +18,8 @@ class User(Base):
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     verification_code: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
     verification_code_expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    reset_password_token: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
+    reset_password_expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     memberships: Mapped[List["OrganizationMembership"]] = relationship(

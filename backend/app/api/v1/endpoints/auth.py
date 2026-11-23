@@ -1,11 +1,13 @@
 import re
 import random
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
+from app.core.config import settings
 from app.core.security import verify_password, hash_password, create_access_token
 from app.db.session import get_db
 from app.api.deps import get_current_user
@@ -17,7 +19,10 @@ from app.schemas.auth import (
     RegisterRequest,
     Token,
     VerifyEmailRequest,
-    ResendVerificationRequest
+    ResendVerificationRequest,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+    PasswordResetResponse,
 )
 from app.schemas.user import UserResponse
 from app.schemas.organization import OrganizationResponse, OrganizationSwitchRequest
@@ -180,6 +185,109 @@ def resend_verification(
 
     email_service.send_verification_email(user.email, user.full_name, new_code)
     return {"status": "sent", "message": "A new verification code has been dispatched to your email."}
+
+@router.post("/forgot-password", response_model=PasswordResetResponse)
+def forgot_password(
+    payload: ForgotPasswordRequest,
+    db: Session = Depends(get_db)
+) -> Any:
+    """
+    Sends a secure password reset link to the specified email address.
+    If the account is not registered, returns HTTP 404 Account not found.
+    """
+    email_clean = payload.email.strip().lower()
+    user = db.execute(select(User).where(User.email == email_clean)).scalar_one_or_none()
+    
+    # Requirement: If user is not already registered, return Account not found
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account not found. Please verify your email address or create an account."
+        )
+
+    # Generate secure 32-byte cryptographic token
+    reset_token = secrets.token_urlsafe(32)
+    user.reset_password_token = reset_token
+    user.reset_password_expires_at = datetime.now(timezone.utc) + timedelta(minutes=30)
+    db.commit()
+
+    # Determine frontend application URL
+    frontend_base = settings.cors_origins[0] if settings.cors_origins else "http://localhost:3000"
+    reset_link = f"{frontend_base}/reset-password?token={reset_token}&email={user.email}"
+
+    # Dispatch email via Google SMTP
+    success, msg = email_service.send_password_reset_email(
+        to_email=user.email,
+        recipient_name=user.full_name,
+        reset_link=reset_link
+    )
+
+    return PasswordResetResponse(
+        status="sent",
+        message="A password reset link has been dispatched to your email address."
+    )
+
+@router.get("/verify-reset-token")
+def verify_reset_token(
+    token: str,
+    email: str,
+    db: Session = Depends(get_db)
+) -> Any:
+    """Validates that a password reset token is valid and unexpired."""
+    email_clean = email.strip().lower()
+    user = db.execute(select(User).where(User.email == email_clean)).scalar_one_or_none()
+    
+    if not user or not user.reset_password_token or user.reset_password_token != token.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired password reset link. Please request a new one."
+        )
+
+    if user.reset_password_expires_at and user.reset_password_expires_at < datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password reset link has expired. Please request a new one."
+        )
+
+    return {"status": "valid", "email": user.email, "full_name": user.full_name}
+
+@router.post("/reset-password", response_model=PasswordResetResponse)
+def reset_password(
+    payload: ResetPasswordRequest,
+    db: Session = Depends(get_db)
+) -> Any:
+    """Resets the user's password using the verified reset token."""
+    email_clean = payload.email.strip().lower()
+    user = db.execute(select(User).where(User.email == email_clean)).scalar_one_or_none()
+    
+    if not user or not user.reset_password_token or user.reset_password_token != payload.token.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token. Please request a fresh reset link."
+        )
+
+    if user.reset_password_expires_at and user.reset_password_expires_at < datetime.now(timezone.utc):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password reset link has expired. Please request a new reset link."
+        )
+
+    if len(payload.new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be at least 8 characters long."
+        )
+
+    # Hash new password using Argon2id and invalidate token
+    user.hashed_password = hash_password(payload.new_password)
+    user.reset_password_token = None
+    user.reset_password_expires_at = None
+    db.commit()
+
+    return PasswordResetResponse(
+        status="success",
+        message="Your password has been reset successfully. You can now log in with your new password."
+    )
 
 @router.post("/login", response_model=Token)
 @router.post("/token", response_model=Token)

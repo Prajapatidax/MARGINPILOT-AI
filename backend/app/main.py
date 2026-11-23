@@ -19,7 +19,15 @@ async def lifespan(app: FastAPI):
     # Ensure all tables exist in database on startup
     try:
         Base.metadata.create_all(bind=engine)
-        print("Database tables verified and initialized successfully.")
+        # Ensure reset_password columns exist in users table
+        with engine.connect() as conn:
+            try:
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_token VARCHAR(255);"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_expires_at TIMESTAMPTZ;"))
+                conn.commit()
+            except Exception:
+                pass
+        print("Database tables and columns verified and initialized successfully.")
     except Exception as e:
         print(f"Warning: Database initialization notice: {e}")
     yield
