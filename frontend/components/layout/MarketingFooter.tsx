@@ -108,13 +108,21 @@ export default function MarketingFooter() {
         {/* Bottom Tier: Copyright & Legal */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© 2026 MarginPilot AI. All rights reserved.</p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             <Link href="/privacy" className="hover:text-slate-800 transition">
               Privacy Policy
             </Link>
             <span className="text-slate-300">|</span>
             <Link href="/terms" className="hover:text-slate-800 transition">
               Terms of Service
+            </Link>
+            <span className="text-slate-300">|</span>
+            <Link href="/refund" className="hover:text-slate-800 transition font-medium text-slate-700">
+              Refund Policy (30-Day Guarantee)
+            </Link>
+            <span className="text-slate-300">|</span>
+            <Link href="/cookies" className="hover:text-slate-800 transition">
+              Cookie Policy
             </Link>
             <span className="text-slate-300">|</span>
             <Link href="/contact" className="hover:text-slate-800 transition">

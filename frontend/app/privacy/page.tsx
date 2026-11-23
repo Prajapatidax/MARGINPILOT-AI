@@ -128,15 +128,44 @@ export default function PrivacyPolicyPage() {
 
           <div className="space-y-3">
             <h2 className="text-lg font-bold text-slate-900 border-b border-slate-200 pb-2">
-              5. Contacting the Privacy &amp; Security Team
+              5. Cookie Management &amp; Related Legal Policies
+            </h2>
+            <p>
+              MarginPilot AI provides a dedicated, interactive Cookie Declaration where you can review all storage identifiers and modify tracking consent at any time:
+            </p>
+            <ul className="list-disc pl-5 space-y-1.5 text-xs text-slate-600">
+              <li>
+                <Link href="/cookies" className="text-blue-600 hover:text-blue-700 font-semibold underline">
+                  Cookie Policy &amp; Declaration
+                </Link>{" "}
+                — Review cookie types and adjust your analytics preferences.
+              </li>
+              <li>
+                <Link href="/refund" className="text-blue-600 hover:text-blue-700 font-semibold underline">
+                  Refund &amp; Cancellation Policy
+                </Link>{" "}
+                — Review our 30-day money-back guarantee and 15 business days resolution SLA.
+              </li>
+              <li>
+                <Link href="/terms" className="text-blue-600 hover:text-blue-700 font-semibold underline">
+                  Terms &amp; Conditions
+                </Link>{" "}
+                — SaaS service agreement and license terms.
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-200 pb-2">
+              6. Contacting the Privacy &amp; Security Team
             </h2>
             <p>
               If you have any questions regarding this Privacy Policy, your organization data rights, or wish to execute a Data Processing Agreement (DPA), please contact our Data Protection Officer:
             </p>
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1 font-mono text-slate-700">
-              <p>Email: privacy@marginpilot.ai</p>
-              <p>Attention: Data Protection Officer</p>
-              <p>MarginPilot AI, Inc. • Enterprise Cloud Division</p>
+              <p className="font-bold font-sans text-slate-900">MarginPilot AI, Inc. — Privacy &amp; Security Office</p>
+              <p>GIFT City / Gandhinagar, Gujarat 382355, India</p>
+              <p>Email: privacy@marginpilot.ai • dpo@marginpilot.ai</p>
             </div>
           </div>
         </div>

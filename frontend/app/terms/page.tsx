@@ -118,16 +118,54 @@ export default function TermsAndConditionsPage() {
 
           <div className="space-y-3">
             <h2 className="text-lg font-bold text-slate-900 border-b border-slate-200 pb-2">
-              7. Governing Law &amp; Dispute Resolution
+              7. 30-Day Refund Policy &amp; 15 Business Days Resolution SLA
             </h2>
             <p>
-              These Terms shall be governed by and construed in accordance with the laws of the State of Delaware, United States, without regard to its conflict of law principles. Any dispute arising out of or related to these Terms shall be resolved through confidential binding arbitration.
+              We provide a transparent, risk-free subscription experience:
+            </p>
+            <ul className="list-disc pl-5 space-y-1.5 text-xs text-slate-600">
+              <li>
+                <strong>30-Day Money-Back Guarantee:</strong> Customers may request a 100% full refund within thirty (30) calendar days of their initial subscription charge or renewal date.
+              </li>
+              <li>
+                <strong>15 Business Days Resolution Commitment:</strong> All submitted refund inquiries and payout solutions will be fully investigated and processed within fifteen (15) business days.
+              </li>
+              <li>
+                For complete terms and instructions on requesting a refund, please review our official{" "}
+                <Link href="/refund" className="text-blue-600 hover:text-blue-700 font-semibold underline">
+                  Refund &amp; Cancellation Policy
+                </Link>
+                .
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-200 pb-2">
+              8. Privacy, Telemetry &amp; Cookie Compliance
+            </h2>
+            <p>
+              By utilizing MarginPilot AI, you agree to our data handling practices described in our{" "}
+              <Link href="/privacy" className="text-blue-600 hover:text-blue-700 font-semibold underline">
+                Privacy Policy
+              </Link>{" "}
+              and{" "}
+              <Link href="/cookies" className="text-blue-600 hover:text-blue-700 font-semibold underline">
+                Cookie Declaration
+              </Link>
+              . We never sell your data or use it to train public artificial intelligence models.
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1 font-mono text-slate-700">
-            <p>MarginPilot AI, Inc. • Legal &amp; Compliance</p>
-            <p>Inquiries: legal@marginpilot.ai</p>
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-200 pb-2">
+              9. Regional Corporate Office &amp; Inquiries
+            </h2>
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1 font-mono text-slate-700">
+              <p className="font-bold font-sans text-slate-900">MarginPilot AI, Inc. — Legal &amp; Compliance</p>
+              <p>GIFT City / Gandhinagar, Gujarat 382355, India</p>
+              <p>Inquiries: legal@marginpilot.ai • billing@marginpilot.ai</p>
+            </div>
           </div>
         </div>
       </section>
