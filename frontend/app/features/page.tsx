@@ -772,8 +772,8 @@ export default function FeaturesPage() {
 
                   <div>
                     <div className="text-[11px] text-slate-400">Net Profit Variance</div>
-                    <div className="text-2xl font-black text-white mt-0.5 flex items-baseline gap-1.5">
-                      <span>{profitDelta >= 0 ? `+$${profitDelta.toLocaleString()}` : `-$${Math.abs(profitDelta).toLocaleString()}`}</span>
+                    <div className="text-2xl font-black text-white mt-0.5 flex items-baseline gap-1.5" suppressHydrationWarning>
+                      <span>{profitDelta >= 0 ? `+$${profitDelta.toLocaleString("en-US")}` : `-$${Math.abs(profitDelta).toLocaleString("en-US")}`}</span>
                     </div>
                   </div>
                 </div>

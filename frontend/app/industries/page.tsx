@@ -199,7 +199,9 @@ export default function IndustriesPage() {
               <div>
                 <div className="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
                   <span>2. Monthly Order Volume:</span>
-                  <span className="text-blue-600 font-mono">${calcRevenue.toLocaleString()} / mo</span>
+                  <span className="text-blue-600 font-mono" suppressHydrationWarning>
+                    ${calcRevenue.toLocaleString("en-US")} / mo
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -234,8 +236,8 @@ export default function IndustriesPage() {
                 </div>
                 <div>
                   <div className="text-[11px] text-slate-400">Annual Profit Expansion</div>
-                  <div className="text-2xl sm:text-3xl font-black text-white mt-0.5">
-                    +${roi.annualLift.toLocaleString()}
+                  <div className="text-2xl sm:text-3xl font-black text-white mt-0.5" suppressHydrationWarning>
+                    +${roi.annualLift.toLocaleString("en-US")}
                   </div>
                 </div>
               </div>
