@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
 
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-600 space-y-2">
               <p className="flex items-center gap-1.5 font-semibold text-slate-800">
-                <span>⏱️</span> Link expires in 30 minutes
+                <span>⏱️</span> Link expires in 10 minutes
               </p>
               <p>
                 Please check your inbox and click the reset button. If you don&apos;t see the message, be sure to check your spam or junk folder.

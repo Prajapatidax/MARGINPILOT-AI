@@ -154,7 +154,7 @@ class GoogleSMTPService:
               </div>
               
               <div class="expiry-box">
-                ⏱️ <strong>Security Notice:</strong> This password reset link is valid for <strong>30 minutes</strong> and can only be used once.
+                ⏱️ <strong>Security Notice:</strong> This password reset link is valid for <strong>10 minutes</strong> and can only be used once.
               </div>
 
               <div class="link-alt">
@@ -176,7 +176,7 @@ class GoogleSMTPService:
             f"Hi {recipient_name},\n\n"
             f"We received a request to reset the password for your MarginPilot AI account.\n\n"
             f"Please visit the following link to choose a new password:\n{reset_link}\n\n"
-            f"This link expires in 30 minutes.\n\n"
+            f"This link expires in 10 minutes.\n\n"
             f"If you did not request this, please ignore this email."
         )
 

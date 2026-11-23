@@ -208,7 +208,7 @@ def forgot_password(
     # Generate secure 32-byte cryptographic token
     reset_token = secrets.token_urlsafe(32)
     user.reset_password_token = reset_token
-    user.reset_password_expires_at = datetime.now(timezone.utc) + timedelta(minutes=30)
+    user.reset_password_expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
     db.commit()
 
     # Determine frontend application URL

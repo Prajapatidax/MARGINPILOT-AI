@@ -132,7 +132,7 @@ function ResetPasswordContent() {
                 <span>Link Expired or Invalid</span>
               </div>
               <p>
-                {error || "This password reset link is invalid or has already been used. Password reset links are strictly single-use and expire after 30 minutes."}
+                {error || "This password reset link is invalid or has already been used. Password reset links are strictly single-use and expire after 10 minutes."}
               </p>
             </div>
 
