@@ -26,26 +26,23 @@ export default function MarketingFooter() {
             </div>
           </Link>
 
-          {/* Quick Dropdown Links */}
+          {/* Quick Nav Links */}
           <div className="flex flex-wrap items-center gap-6 text-xs font-semibold text-slate-700">
-            <Link href="/features" className="hover:text-blue-600 transition flex items-center gap-1">
-              <span>Product</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <Link href="/features" className="hover:text-blue-600 transition">
+              <span>Features</span>
             </Link>
-            <Link href="/industries" className="hover:text-blue-600 transition flex items-center gap-1">
+            <Link href="/industries" className="hover:text-blue-600 transition">
               <span>Industries</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </Link>
-            <Link href="/status" className="hover:text-blue-600 transition flex items-center gap-1">
-              <span>Resources</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <Link href="/pricing" className="hover:text-blue-600 transition">
+              <span>Pricing</span>
             </Link>
-            <Link href="/contact" className="hover:text-blue-600 transition flex items-center gap-1">
-              <span>Company</span>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            <Link href="/status" className="hover:text-blue-600 transition flex items-center gap-1.5 text-slate-800">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Status</span>
             </Link>
             <Link href="/contact" className="hover:text-blue-600 transition">
-              <span>Support</span>
+              <span>About &amp; Contact</span>
             </Link>
           </div>
 
