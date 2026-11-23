@@ -13,7 +13,6 @@ import {
   ShieldCheck,
   MessageSquare,
   Sparkles,
-  Users,
   Target,
   Globe2,
   Award,
@@ -68,33 +67,6 @@ export default function ContactPage() {
       desc: "Sub-20ms dashboard queries, high-throughput Polars ingestion workers, and 99.99% high availability backed by contractual financial SLA credits.",
       icon: Zap,
       color: "text-amber-600 bg-amber-50 border-amber-200",
-    },
-  ];
-
-  const leaders = [
-    {
-      name: "Aarav Singhania",
-      role: "Co-Founder & Chief Executive Officer",
-      bio: "Former McKinsey & Company engagement manager leading enterprise supply chain transformations across North America and India.",
-      image: "/images/founder-ceo.jpg",
-    },
-    {
-      name: "Dr. Emily Watson",
-      role: "Co-Founder & Chief AI Scientist",
-      bio: "Ph.D. in Recurrent Neural Networks & Time-Series Forecasting. Former DeepMind research fellow specializing in LSTM architectures.",
-      image: "/images/chief-ai.jpg",
-    },
-    {
-      name: "Rajesh Mehta",
-      role: "Executive Advisory Member & Manufacturing Partner",
-      bio: "CEO of ABC Manufacturing and early design partner who helped shape MarginPilot AI's BOM cost rollup and machine anomaly models.",
-      image: "/images/rajesh-mehta.jpg",
-    },
-    {
-      name: "Elena Rostova",
-      role: "VP of Enterprise Solutions Architecture",
-      bio: "18+ years leading multi-hub distribution technology and WMS/ERP integrations across Europe, North America, and Asia.",
-      image: "/images/elena-rostova.jpg",
     },
   ];
 
@@ -162,12 +134,6 @@ export default function ContactPage() {
             className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition shadow-xs"
           >
             Our Mission &amp; Impact
-          </a>
-          <a
-            href="#leadership"
-            className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition shadow-xs"
-          >
-            Leadership Team
           </a>
           <a
             href="#offices"
@@ -287,50 +253,6 @@ export default function ContactPage() {
               </div>
             );
           })}
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* LEADERSHIP & SCIENTIFIC TEAM */}
-      {/* ========================================================================= */}
-      <section id="leadership" className="py-16 px-6 max-w-7xl mx-auto w-full border-t border-slate-200/80">
-        <div className="text-center space-y-3 mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-            <Users className="w-3.5 h-3.5" />
-            <span>Leadership &amp; Applied Science</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Meet Our Leadership Team
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto">
-            Experienced researchers, enterprise software architects, and operations veterans united to make margin optimization autonomous.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {leaders.map((leader, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs text-center space-y-4 hover:shadow-md transition-all"
-            >
-              <div className="w-24 h-24 rounded-2xl overflow-hidden mx-auto border-2 border-blue-600/20 shadow-md">
-                <img
-                  src={leader.image}
-                  alt={leader.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <h4 className="text-base font-bold text-slate-900">{leader.name}</h4>
-                <p className="text-[11px] font-bold text-blue-600 leading-snug">{leader.role}</p>
-              </div>
-
-              <p className="text-xs text-slate-500 leading-relaxed text-left pt-2 border-t border-slate-100">
-                {leader.bio}
-              </p>
-            </div>
-          ))}
         </div>
       </section>
 
