@@ -13,16 +13,23 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!agreeTerms) {
+      setError("Please agree to the Terms & Conditions and Privacy Policy to continue.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
+      await login(email, password, undefined, true);
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message || "Failed to sign in. Please verify your email and password.");
@@ -104,17 +111,51 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="remember-me" className="ml-2 block text-xs text-slate-600 select-none">
-              Remember me
-            </label>
+          {/* Remember Me & Terms Agreement Bar */}
+          <div className="space-y-3 pt-0.5">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+              />
+              <label htmlFor="remember-me" className="ml-2 block text-xs text-slate-600 select-none cursor-pointer">
+                Remember me
+              </label>
+            </div>
+
+            {/* Click bar to agree to Terms & Conditions and Privacy Policy */}
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/90 hover:bg-blue-50/40 transition-colors">
+              <input
+                id="agree-terms"
+                type="checkbox"
+                required
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
+              />
+              <label htmlFor="agree-terms" className="text-xs text-slate-600 select-none leading-relaxed cursor-pointer">
+                I agree to the{" "}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  className="text-blue-600 hover:text-blue-700 font-semibold underline underline-offset-2"
+                >
+                  Terms &amp; Conditions
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="text-blue-600 hover:text-blue-700 font-semibold underline underline-offset-2"
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </label>
+            </div>
           </div>
 
           <button

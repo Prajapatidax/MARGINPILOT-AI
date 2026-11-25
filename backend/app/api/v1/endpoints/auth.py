@@ -60,7 +60,9 @@ def register(
         is_superadmin=False,
         is_verified=False,
         verification_code=verification_code,
-        verification_code_expires_at=code_expires
+        verification_code_expires_at=code_expires,
+        terms_accepted=True if payload.terms_accepted else False,
+        terms_accepted_at=datetime.now(timezone.utc) if payload.terms_accepted else None
     )
     db.add(user)
     db.flush()
@@ -308,6 +310,12 @@ def login(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is inactive. Contact your organization administrator."
         )
+
+    # Record terms and conditions & privacy policy agreement in DB
+    if payload.terms_accepted:
+        user.terms_accepted = True
+        user.terms_accepted_at = datetime.now(timezone.utc)
+        db.commit()
 
     # Get memberships
     memberships = db.execute(

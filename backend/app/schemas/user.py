@@ -10,6 +10,8 @@ class UserResponse(BaseModel):
     is_active: bool
     is_superadmin: bool
     is_verified: bool = False
+    terms_accepted: bool = False
+    terms_accepted_at: Optional[datetime] = None
     created_at: datetime
     organizations: List[OrganizationResponse] = []
     active_organization_id: Optional[str] = None

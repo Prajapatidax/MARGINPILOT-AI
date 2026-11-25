@@ -24,6 +24,8 @@ async def lifespan(app: FastAPI):
             try:
                 conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_token VARCHAR(255);"))
                 conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_password_expires_at TIMESTAMPTZ;"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS terms_accepted BOOLEAN DEFAULT FALSE;"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMPTZ;"))
                 conn.commit()
             except Exception:
                 pass

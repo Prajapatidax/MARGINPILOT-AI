@@ -25,6 +25,8 @@ export interface User {
   is_active: boolean;
   is_superadmin: boolean;
   is_verified?: boolean;
+  terms_accepted?: boolean;
+  terms_accepted_at?: string;
   organizations: Organization[];
   active_organization_id?: string;
 }
@@ -46,7 +48,7 @@ interface AuthContextType {
   activeOrg: Organization | null;
   token: string | null;
   isLoading: boolean;
-  login: (email: string, password: string, orgId?: string) => Promise<void>;
+  login: (email: string, password: string, orgId?: string, termsAccepted?: boolean) => Promise<void>;
   register: (payloadOrEmail: RegisterPayload | string, password?: string, fullName?: string, orgName?: string, bizType?: string) => Promise<{ requiresVerification?: boolean }>;
   verifyEmail: (email: string, code: string) => Promise<{ status: string; message: string }>;
   resendVerification: (email: string) => Promise<{ status: string; message: string }>;
@@ -89,10 +91,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = async (email: string, password: string, orgId?: string) => {
+  const login = async (email: string, password: string, orgId?: string, termsAccepted: boolean = true) => {
     const res = await apiClient<{ access_token: string; active_organization_id: string; role: string }>("/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password, organization_id: orgId }),
+      body: JSON.stringify({ email, password, organization_id: orgId, terms_accepted: termsAccepted }),
     });
     localStorage.setItem("marginpilot_token", res.access_token);
     if (res.active_organization_id) {
@@ -121,6 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currency: payloadOrEmail.currency || "USD",
         timezone: payloadOrEmail.timezone || "UTC",
         subscription_plan: payloadOrEmail.subscriptionPlan || "GROWTH",
+        terms_accepted: true,
       };
     } else {
       requestBody = {
@@ -129,6 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         full_name: fullName,
         organization_name: orgName,
         business_type: bizType || "RETAIL",
+        terms_accepted: true,
       };
     }
 

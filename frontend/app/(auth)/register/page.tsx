@@ -44,6 +44,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(true);
 
   // Organization Settings (Task 2)
   const initialCurrency = searchParams.get("currency") || "USD";
@@ -276,6 +277,37 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            {/* Terms and Privacy Click Bar */}
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/90 hover:bg-blue-50/40 transition-colors">
+              <input
+                id="reg-agree-terms"
+                type="checkbox"
+                required
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0"
+              />
+              <label htmlFor="reg-agree-terms" className="text-xs text-slate-600 select-none leading-relaxed cursor-pointer">
+                I agree to the{" "}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  className="text-blue-600 hover:text-blue-700 font-semibold underline underline-offset-2"
+                >
+                  Terms &amp; Conditions
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="text-blue-600 hover:text-blue-700 font-semibold underline underline-offset-2"
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </label>
+            </div>
+
             <button
               type="button"
               onClick={() => {
@@ -285,6 +317,10 @@ export default function RegisterPage() {
                 }
                 if (password.length < 8) {
                   setError("Password must be at least 8 characters.");
+                  return;
+                }
+                if (!agreeTerms) {
+                  setError("Please agree to the Terms & Conditions and Privacy Policy to continue.");
                   return;
                 }
                 setError(null);

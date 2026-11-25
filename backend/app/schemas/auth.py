@@ -19,6 +19,7 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
     organization_id: Optional[str] = None  # Optional: specific org to sign into
+    terms_accepted: Optional[bool] = True
 
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -32,6 +33,7 @@ class RegisterRequest(BaseModel):
     reporting_currency: Optional[str] = None
     timezone: Optional[str] = "UTC"
     subscription_plan: Optional[str] = "GROWTH"
+    terms_accepted: Optional[bool] = True
 
 class VerifyEmailRequest(BaseModel):
     email: EmailStr
